@@ -1,0 +1,1 @@
+export default function Page(){return <section className="section"><div className="wrap"><article className="card"><p className="eyebrow">Media</p><h1>Videos</h1><p>[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT] Current content only; archive outdated items.</p></article></div></section>}

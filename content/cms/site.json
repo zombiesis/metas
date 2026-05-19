@@ -1,0 +1,162 @@
+{
+  "name": "Metas Adventist College, Surat",
+  "shortName": "Metas Adventist College",
+  "organization": "Medical Educational Trust Association Surat of Seventh-day Adventist / Metas Group of Institutions",
+  "mission": "To Touch The Lives And To Transform People By Teaching, By Healing And By Creating A Better Community For Man And God.",
+  "vision": "To Become A Dynamic Global Institution And A Centre Of Excellence.",
+  "address": "Metas of Seventh-Day Adventists, P.O. Box No. 24, Athwalines, Surat - 395001, Gujarat",
+  "hours": "Mon-Fri, 09:00-13:00 & 15:30-17:30",
+  "phones": {
+    "registrar": "0261-7160215",
+    "admissions": "95126 44385",
+    "placement": "0261-7159490",
+    "placementMobile": "9723555799"
+  },
+  "emails": {
+    "principal": "principalcollege@metasofsda.in",
+    "registrar": "registrarsurat@metasofsda.in",
+    "placement": "placementcell@metasofsda.in"
+  },
+  "navigation": [
+    [
+      "Home",
+      "/"
+    ],
+    [
+      "About",
+      "/about"
+    ],
+    [
+      "Academics",
+      "/academics"
+    ],
+    [
+      "Admissions",
+      "/admissions"
+    ],
+    [
+      "Student Corner",
+      "/student-corner"
+    ],
+    [
+      "Faculty",
+      "/faculty"
+    ],
+    [
+      "Placements",
+      "/placements"
+    ],
+    [
+      "Infrastructure",
+      "/infrastructure"
+    ],
+    [
+      "IQAC / Accreditation",
+      "/iqac-accreditation"
+    ],
+    [
+      "Media",
+      "/media"
+    ],
+    [
+      "Alumni",
+      "/alumni"
+    ],
+    [
+      "Careers",
+      "/careers/current-openings"
+    ],
+    [
+      "Contact",
+      "/contact"
+    ]
+  ],
+  "values": [
+    "Compassionate in all dealings",
+    "Loyal to organizational goals",
+    "Hard work with passion and productivity",
+    "Continuous self-renewal",
+    "Honesty and integrity"
+  ],
+  "infrastructure": [
+    "Library",
+    "Student Centre",
+    "Hostel",
+    "Auditorium",
+    "Gymnasium",
+    "Computer Lab",
+    "Language Lab",
+    "Conference Hall",
+    "Playground",
+    "Lift",
+    "Fire Safety",
+    "Security",
+    "Canteen"
+  ],
+  "statPlaceholders": [
+    "Professors",
+    "Students",
+    "Programs",
+    "Recruiters"
+  ],
+  "principal": {
+    "name": "Dr. Anil Kumar Ch.",
+    "designation": "President, CEO and Principal",
+    "source": "Live site faculty listing identifies Dr. Anil Kumar Ch. as President, CEO and Principal with MA, MBA, M.Phil, PhD.",
+    "phone": "0261-7160215",
+    "email": "principalcollege@metasofsda.in",
+    "alternateEmail": "iqac@metasofsda.in",
+    "verificationStatus": "Verified from live site faculty listing 2026."
+  },
+  "legalIdentity": {
+    "minorityInstitution": "A Minority Institution: F.No. C-274 of 2006",
+    "trust": "Medical Educational Trust Association Surat of Seventh-day Adventist",
+    "institutionType": "Private-Self Financing / Self-financing",
+    "campus": "Own campus: Yes (as stated in AQAR 2022-2023)",
+    "location": "Urban, Surat, Gujarat",
+    "naacHistoricalNote": "Older governing/student-support documents state Accredited B++ by NAAC. AQAR 2022-2023 lists prior Cycle 1 Grade B, CGPA 2.85, valid 10/07/2014 to 09/07/2019. The site must not claim current NAAC accreditation until admin uploads current validity proof.",
+    "complianceWarning": "Do not edit statutory wording casually. Any approval, affiliation, NAAC, AICTE, GTU, VNSGU, or GNC statement must be tied to a document entry."
+  },
+  "sourceMap": [
+    {
+      "label": "Institute Details",
+      "url": "https://suratcollege.metasofsda.in/institute-details"
+    },
+    {
+      "label": "Director's Message",
+      "url": "https://suratcollege.metasofsda.in/directors-message"
+    },
+    {
+      "label": "Education Policy",
+      "url": "https://suratcollege.metasofsda.in/education-policy"
+    },
+    {
+      "label": "Affiliations & Accreditation",
+      "url": "https://suratcollege.metasofsda.in/affiliations-and-accreditation"
+    },
+    {
+      "label": "IQAC Reports",
+      "url": "https://suratcollege.metasofsda.in/iqac-reports"
+    },
+    {
+      "label": "MBA Course",
+      "url": "https://suratcollege.metasofsda.in/course/MBA"
+    },
+    {
+      "label": "BBA Course",
+      "url": "https://suratcollege.metasofsda.in/course/BBA"
+    },
+    {
+      "label": "GNM Course",
+      "url": "https://suratcollege.metasofsda.in/course/GNM"
+    },
+    {
+      "label": "Placement Cell Info",
+      "url": "https://suratcollege.metasofsda.in/student-wise-placement-information"
+    },
+    {
+      "label": "Cancellation Policy",
+      "url": "https://suratcollege.metasofsda.in/cancellation-policy"
+    }
+  ]
+}

@@ -1,0 +1,509 @@
+[
+  {
+    "title": "Campus Facility",
+    "url": "/assets/images/campus-facility.webp",
+    "fileName": "campus-facility.webp",
+    "folder": ".",
+    "mimeType": "image/webp",
+    "altText": "Campus Facility",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "images"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Campus Hero",
+    "url": "/assets/images/campus-hero.webp",
+    "fileName": "campus-hero.webp",
+    "folder": ".",
+    "mimeType": "image/webp",
+    "altText": "Campus Hero",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "images"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Campus Life",
+    "url": "/assets/images/campus-life.webp",
+    "fileName": "campus-life.webp",
+    "folder": ".",
+    "mimeType": "image/webp",
+    "altText": "Campus Life",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "images"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Classroom",
+    "url": "/assets/images/classroom.webp",
+    "fileName": "classroom.webp",
+    "folder": ".",
+    "mimeType": "image/webp",
+    "altText": "Classroom",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "images"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Director Placeholder Verified Source",
+    "url": "/assets/images/director-placeholder-verified-source.webp",
+    "fileName": "director-placeholder-verified-source.webp",
+    "folder": ".",
+    "mimeType": "image/webp",
+    "altText": "Director Placeholder Verified Source",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "images"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Aayushi Pareshbhai Master",
+    "url": "/assets/images/faculty/aayushi-pareshbhai-master.webp",
+    "fileName": "aayushi-pareshbhai-master.webp",
+    "folder": "faculty",
+    "mimeType": "image/webp",
+    "altText": "Aayushi Pareshbhai Master",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "faculty"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Koteshwar Laxmaiah Boddulla",
+    "url": "/assets/images/faculty/koteshwar-laxmaiah-boddulla.webp",
+    "fileName": "koteshwar-laxmaiah-boddulla.webp",
+    "folder": "faculty",
+    "mimeType": "image/webp",
+    "altText": "Koteshwar Laxmaiah Boddulla",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "faculty"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Monica Sridhar Bodugu",
+    "url": "/assets/images/faculty/monica-sridhar-bodugu.webp",
+    "fileName": "monica-sridhar-bodugu.webp",
+    "folder": "faculty",
+    "mimeType": "image/webp",
+    "altText": "Monica Sridhar Bodugu",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "faculty"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Namrata S Chauhan",
+    "url": "/assets/images/faculty/namrata-s-chauhan.webp",
+    "fileName": "namrata-s-chauhan.webp",
+    "folder": "faculty",
+    "mimeType": "image/webp",
+    "altText": "Namrata S Chauhan",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "faculty"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Nimmy Syam",
+    "url": "/assets/images/faculty/nimmy-syam.webp",
+    "fileName": "nimmy-syam.webp",
+    "folder": "faculty",
+    "mimeType": "image/webp",
+    "altText": "Nimmy Syam",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "faculty"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Pratham Arunbhai Bhoi",
+    "url": "/assets/images/faculty/pratham-arunbhai-bhoi.webp",
+    "fileName": "pratham-arunbhai-bhoi.webp",
+    "folder": "faculty",
+    "mimeType": "image/webp",
+    "altText": "Pratham Arunbhai Bhoi",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "faculty"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Tanvi Pareshkumar Botare",
+    "url": "/assets/images/faculty/tanvi-pareshkumar-botare.webp",
+    "fileName": "tanvi-pareshkumar-botare.webp",
+    "folder": "faculty",
+    "mimeType": "image/webp",
+    "altText": "Tanvi Pareshkumar Botare",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "faculty"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Aicte",
+    "url": "/assets/images/logos/aicte.webp",
+    "fileName": "aicte.webp",
+    "folder": "logos",
+    "mimeType": "image/webp",
+    "altText": "Aicte",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "logos"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gtu",
+    "url": "/assets/images/logos/gtu.webp",
+    "fileName": "gtu.webp",
+    "folder": "logos",
+    "mimeType": "image/webp",
+    "altText": "Gtu",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "logos"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Metas College Logo White",
+    "url": "/assets/images/logos/metas-college-logo-white.png",
+    "fileName": "metas-college-logo-white.png",
+    "folder": "logos",
+    "mimeType": "image/png",
+    "altText": "Metas College Logo White",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "logos"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Metas College Logo",
+    "url": "/assets/images/logos/metas-college-logo.png",
+    "fileName": "metas-college-logo.png",
+    "folder": "logos",
+    "mimeType": "image/png",
+    "altText": "Metas College Logo",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "logos"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Mooc",
+    "url": "/assets/images/logos/mooc.webp",
+    "fileName": "mooc.webp",
+    "folder": "logos",
+    "mimeType": "image/webp",
+    "altText": "Mooc",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "logos"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Naac",
+    "url": "/assets/images/logos/naac.webp",
+    "fileName": "naac.webp",
+    "folder": "logos",
+    "mimeType": "image/webp",
+    "altText": "Naac",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "logos"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Ndli",
+    "url": "/assets/images/logos/ndli.webp",
+    "fileName": "ndli.webp",
+    "folder": "logos",
+    "mimeType": "image/webp",
+    "altText": "Ndli",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "logos"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Swayam",
+    "url": "/assets/images/logos/swayam.webp",
+    "fileName": "swayam.webp",
+    "folder": "logos",
+    "mimeType": "image/webp",
+    "altText": "Swayam",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "logos"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Values Ceremony",
+    "url": "/assets/images/values-ceremony.webp",
+    "fileName": "values-ceremony.webp",
+    "folder": ".",
+    "mimeType": "image/webp",
+    "altText": "Values Ceremony",
+    "caption": "Imported from original site ZIP or generated optimization pipeline; admin should verify usage and alt text.",
+    "tags": [
+      "images"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Aicte Eoa 2026 27 Mba Bba Bca",
+    "url": "/documents/approvals/aicte-eoa-2026-27-mba-bba-bca.pdf",
+    "fileName": "aicte-eoa-2026-27-mba-bba-bca.pdf",
+    "folder": "documents/approvals",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gnc Permission Gnm Bsc Nursing 2025 26",
+    "url": "/documents/approvals/gnc-permission-gnm-bsc-nursing-2025-26.pdf",
+    "fileName": "gnc-permission-gnm-bsc-nursing-2025-26.pdf",
+    "folder": "documents/approvals",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gtu Bba Affiliation 2025 26",
+    "url": "/documents/approvals/gtu-bba-affiliation-2025-26.pdf",
+    "fileName": "gtu-bba-affiliation-2025-26.pdf",
+    "folder": "documents/approvals",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gtu Mba Affiliation 2025 26",
+    "url": "/documents/approvals/gtu-mba-affiliation-2025-26.pdf",
+    "fileName": "gtu-mba-affiliation-2025-26.pdf",
+    "folder": "documents/approvals",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Vnsgu Permission Bsc Nursing 2025 26",
+    "url": "/documents/approvals/vnsgu-permission-bsc-nursing-2025-26.pdf",
+    "fileName": "vnsgu-permission-bsc-nursing-2025-26.pdf",
+    "folder": "documents/approvals",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Faculty Requirement Management Bca Nursing February 2026",
+    "url": "/documents/careers/faculty-requirement-management-bca-nursing-february-2026.pdf",
+    "fileName": "faculty-requirement-management-bca-nursing-february-2026.pdf",
+    "folder": "documents/careers",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Aqar 2022 23",
+    "url": "/documents/iqac/aqar-2022-23.pdf",
+    "fileName": "aqar-2022-23.pdf",
+    "folder": "documents/iqac",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Aqar 2023 24 Review Verification Required",
+    "url": "/documents/iqac/aqar-2023-24-review-verification-required.pdf",
+    "fileName": "aqar-2023-24-review-verification-required.pdf",
+    "folder": "documents/iqac",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Institutional Development Plan Nursing 2025 2030",
+    "url": "/documents/iqac/institutional-development-plan-nursing-2025-2030.pdf",
+    "fileName": "institutional-development-plan-nursing-2025-2030.pdf",
+    "folder": "documents/iqac",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Strategic Plan 2023 28",
+    "url": "/documents/iqac/strategic-plan-2023-28.pdf",
+    "fileName": "strategic-plan-2023-28.pdf",
+    "folder": "documents/iqac",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "The Communique Vol 04 Jan Dec 2024",
+    "url": "/documents/newsletters/the-communique-vol-04-jan-dec-2024.pdf",
+    "fileName": "the-communique-vol-04-jan-dec-2024.pdf",
+    "folder": "documents/newsletters",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gtu Bba Sem I Regular Winter 2025 Timetable",
+    "url": "/documents/notices/gtu-bba-sem-i-regular-winter-2025-timetable.pdf",
+    "fileName": "gtu-bba-sem-i-regular-winter-2025-timetable.pdf",
+    "folder": "documents/notices",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gtu Mba Sem I Regular Remedial Winter 2025 Timetable",
+    "url": "/documents/notices/gtu-mba-sem-i-regular-remedial-winter-2025-timetable.pdf",
+    "fileName": "gtu-mba-sem-i-regular-remedial-winter-2025-timetable.pdf",
+    "folder": "documents/notices",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gtu Mba Sem I Regular Winter 2024 Result",
+    "url": "/documents/notices/gtu-mba-sem-i-regular-winter-2024-result.pdf",
+    "fileName": "gtu-mba-sem-i-regular-winter-2024-result.pdf",
+    "folder": "documents/notices",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gtu Mba Sem Ii Remedial Winter 2025 Timetable",
+    "url": "/documents/notices/gtu-mba-sem-ii-remedial-winter-2025-timetable.pdf",
+    "fileName": "gtu-mba-sem-ii-remedial-winter-2025-timetable.pdf",
+    "folder": "documents/notices",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Gtu Mba Sem Iii Regular Winter 2025 Timetable",
+    "url": "/documents/notices/gtu-mba-sem-iii-regular-winter-2025-timetable.pdf",
+    "fileName": "gtu-mba-sem-iii-regular-winter-2025-timetable.pdf",
+    "folder": "documents/notices",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Mba Vacant Quota Admission Instructions 2025 26",
+    "url": "/documents/notices/mba-vacant-quota-admission-instructions-2025-26.pdf",
+    "fileName": "mba-vacant-quota-admission-instructions-2025-26.pdf",
+    "folder": "documents/notices",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  },
+  {
+    "title": "Placement Cell Policy And Team",
+    "url": "/documents/placement/placement-cell-policy-and-team.pdf",
+    "fileName": "placement-cell-policy-and-team.pdf",
+    "folder": "documents/placement",
+    "mimeType": "application/pdf",
+    "altText": "",
+    "caption": "Downloaded/organized live-site document; verify metadata before launch.",
+    "tags": [
+      "document"
+    ],
+    "status": "active"
+  }
+]

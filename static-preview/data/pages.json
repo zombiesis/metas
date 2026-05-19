@@ -1,0 +1,189 @@
+{
+  "home": {
+    "heroTitle": "Metas Adventist College, Surat",
+    "heroSubtitle": "Values-based higher education rooted in Adventist service, academic discipline, professional growth, and community transformation.",
+    "welcomeTitle": "Welcome to Metas Adventist College",
+    "welcomeBody": "<p>The METAS Group of Institutions is part of the educational and medical service tradition of the Seventh-day Adventist Organisation. Metas Adventist College was established in Surat in 1998, and the school, college, and hospital units were brought under the common Metas umbrella to create a consolidated platform for growth and development.</p><p>The redesigned website keeps verified public information front and centre: admissions, programs, faculty, placement, IQAC/accreditation documents, student support, governance, and legal/compliance material. Placeholder content, fake counters, and unverified testimonials must remain removed.</p>",
+    "whyChoose": [
+      "Seventh-day Adventist service foundation",
+      "Established in Surat in 1998",
+      "Values-based academic environment",
+      "Management and nursing program strength",
+      "Placement cell and internship support",
+      "Searchable compliance documents",
+      "Athwalines institutional location",
+      "Transparent admissions and student support"
+    ],
+    "testimonialsNote": "Testimonials to be added by admin only after written approval. No fake names or generic quotes."
+  },
+  "about": {
+    "title": "About Metas Adventist College",
+    "summary": "Metas Adventist College is a values-based higher education institution in Athwalines, Surat, operated within the Metas / Seventh-day Adventist educational and service tradition.",
+    "body": "<h2>Institutional background</h2><p>The METAS Group of Institutions is part of the broad educational and medical institutional network run by the Seventh-day Adventist Organisation. Metas Adventist College was established in Surat in 1998. The School, College, and Hospital were earlier operated as separate units and were brought together under the common Metas umbrella to strengthen institutional growth and development.</p><p>The institution is presented as a Metas unit and part of the Seventh-day Adventist Organization. Its official public contact point is Metas of Seventh-Day Adventists, P.O. Box No. 24, Athwalines, Surat - 395001, Gujarat.</p><h2>Leadership and principal context</h2><p>The AQAR 2022-2023 document lists the Head of the Institution as Dr. Srikakolli Eliah with designation Principal. It also records the institution as affiliated, co-educational, urban, and self-financing, functioning from its own campus.</p><h2>Mission</h2><p>To Touch The Lives And To Transform People By Teaching, By Healing And By Creating A Better Community For Man And God.</p><h2>Vision</h2><p>To Become A Dynamic Global Institution And A Centre Of Excellence.</p><h2>Core values</h2><ul><li>Compassionate in all dealings.</li><li>Loyal to organizational goals.</li><li>Hard work with passion and productivity.</li><li>Continuous self-renewal.</li><li>Honesty and integrity in all aspects.</li></ul>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/institute-details",
+      "/documents/iqac/aqar-2022-23.pdf"
+    ],
+    "seoTitle": "About Metas Adventist College, Surat",
+    "seoDescription": "Institutional profile, mission, vision, values, principal context, and verified Metas Adventist College background."
+  },
+  "placements": {
+    "title": "Placement Cell & Recruiter Engagement",
+    "summary": "The Placement Cell supports student employability and maintains collaboration with public and private sector undertakings.",
+    "overview": "Metas Adventist College, Surat has a placement cell which looks into the needs of employability of the students. It maintains active collaboration with various public and private sector undertakings so potential recruiters can come to the College Placement Cell for placement-related activities.",
+    "body": "<h2>Placement Cell</h2><p>Metas Adventist College, Surat has a Placement Cell focused on student employability. The live placement page states that the cell maintains active collaboration with public and private sector undertakings and supports placement-related activities for students.</p><h2>Internship Program</h2><p>The live placement page states that students are given an opportunity to undergo a four-week summer internship in reputed companies across industry fields. The cell supports internships with technical guidance from teachers and helps students connect classroom concepts with real organizations.</p><h2>Placement Process</h2><p>The live page states that the placement process starts in March, with formal invitations and placement brochures sent to companies, followed by active follow-up by the Training and Placement Cell and the department.</p>",
+    "team": [
+      {
+        "name": "Mr. Khirod Dalpati",
+        "designation": "Placement Officer",
+        "email": "placementcell@metasofsda.in",
+        "phone": "9723555799",
+        "sourceNote": "Public live page also lists khirod_dalpati@yahoo.in; use official placementcell@metasofsda.in for website display."
+      },
+      {
+        "name": "Dr. Tushti Bakrania",
+        "designation": "Assistant Professor",
+        "email": "tush.bakrania@gmail.com",
+        "phone": "9662676768",
+        "sourceNote": "Live placement team list; admin should confirm public display permission."
+      },
+      {
+        "name": "Ms. Vineeta Chopra",
+        "designation": "Assistant Professor",
+        "email": "vineetachopra10@gmail.com",
+        "phone": "9925611174",
+        "sourceNote": "Live placement team list; admin should confirm public display permission."
+      },
+      {
+        "name": "Mr. Binoy Sebastion",
+        "designation": "Marketing Manager",
+        "email": "binoysebastion@yahoo.com",
+        "phone": "9574002121",
+        "sourceNote": "Live placement team list; admin should confirm spelling and display permission."
+      }
+    ],
+    "studentRepresentatives": [
+      "Hetvi Ghael",
+      "Suraj Das",
+      "Rachana Sau",
+      "Dhvani Chhajed"
+    ],
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/student-wise-placement-information"
+    ]
+  },
+  "research": {
+    "title": "Research & Development",
+    "summary": "The R&D Cell looks after publications and research work of students and staff and ensures that research remains an ongoing activity at Metas.",
+    "body": "<p>The live R&D Cell page states that the R&D cell of Metas Adventist College looks after the publications and research work of students and staff and ensures that research is an ongoing activity in Metas.</p><p>The legacy page contained placeholder filler after the first real statement. That filler has been intentionally removed. The Research Data page contains detailed faculty qualification, conference, workshop/FDP, and publication records, which should be migrated into structured faculty/research profile records.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/research-and-development-cell",
+      "https://suratcollege.metasofsda.in/research-and-development"
+    ],
+    "researchProfilesToMigrate": [
+      "Ms. Victoria Philip Lucas",
+      "Mr. Prabir Ghosh",
+      "Ms. Surabhi Sugathan"
+    ]
+  },
+  "directorsMessage": {
+    "title": "Director's Message",
+    "summary": "Official leadership message carried forward from the live site, with admin approval required for updated year/portrait.",
+    "body": "<p>Once again it gives me great pleasure to welcome each of you to another exciting and meaningful new Academic Year 2023-24. As an institution of higher education, Metas Adventist College, Surat is committed to the discovery and transmission of knowledge.</p><p>Our college started in the year 1998 and since then there was no turning back in what we have been achieving. To nurture leaders and entrepreneurs with a human touch, the college consciously strives to create a culture that values teaming, humility and professionalism at all levels.</p><p>We have seasoned faculty members who are actively involved in learning, fostering, creating knowledge and believe that learning can be a celebration. This is further facilitated by our domain-specific centers of excellence in research and entrepreneurship.</p><p class=\"required\">Admin must upload the approved current principal/director portrait and confirm the designation/year before publishing a refreshed version.</p>",
+    "leaderName": "Dr. Srikakolli Eliah",
+    "leaderDesignation": "Principal / President & CEO reference appears in public documents and newsletters; admin must choose approved public designation for this page.",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/directors-message",
+      "/documents/iqac/aqar-2022-23.pdf"
+    ],
+    "seoTitle": "Director's Message | Metas Adventist College, Surat",
+    "seoDescription": "Leadership message and verified principal context for Metas Adventist College, Surat."
+  },
+  "educationPolicy": {
+    "title": "Education Policy",
+    "summary": "The official educational philosophy published by Metas Adventist College, framed by holistic development and service.",
+    "body": "<h2>Education policy statement</h2><p>Metas Adventist College considers education to be more than preparation for present life alone. The policy emphasizes harmonious development of physical, mental, and spiritual powers, and preparation for service.</p><p>The live policy states that the institution's success depends on a community of teachers committed to professional ability, moral integrity, fairness, and humanity. It also states a commitment to building a fair human society, preserving cultural heritage, religious harmony and ethnic integration, and giving special care to poor and marginalized people.</p><p>The institution states that it is open to all students regardless of caste and creed, and that students are accepted and developed within their cultural, social, and religious traditions. It also says the institution should be open to society through continuing education and informal teaching.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/education-policy"
+    ],
+    "seoTitle": "Education Policy | Metas Adventist College, Surat",
+    "seoDescription": "Official education policy context for Metas Adventist College, Surat."
+  },
+  "governingBody": {
+    "title": "Governing Body",
+    "summary": "Governance material must remain downloadable and tied to the official Governing Body PDF.",
+    "body": "<p>The live Governing Body page links a Governing Body document. Search-indexed PDF text identifies Metas Adventist College as a Minority Institution: F.No. C-274 of 2006, AICTE approved, and a unit of Medical Educational Trust Association Surat of Seventh-day Adventist.</p><p class=\"required\">Admin must verify the current governing body member list before presenting names as current. Until then, publish the document and show governance status as document-backed.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/governingbody",
+      "https://suratcollege.metasofsda.in/governing_pdf/Governing%20Body90650.pdf"
+    ],
+    "documentLinks": [
+      "Governing Body 2022 PDF"
+    ]
+  },
+  "organogram": {
+    "title": "Organogram",
+    "summary": "Administrative reporting structure and organogram page migrated from the live site.",
+    "body": "<p>The live site includes an Organogram page under About/Governing Body. The new CMS should allow admin to upload the approved organogram image/PDF and replace it without developer involvement.</p><p class=\"required\">[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT] Upload current organogram image/PDF and confirm designations before publishing as current.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/aboutorganogramm"
+    ]
+  },
+  "legalCompliance": {
+    "title": "Legal & Compliance Identity",
+    "summary": "Document-backed legal, accreditation, affiliation, and statutory identity information for public trust.",
+    "body": "<h2>Legal identity</h2><ul><li>Minority Institution: F.No. C-274 of 2006, as shown in governing/student-support documents.</li><li>Unit of Medical Educational Trust Association Surat of Seventh-day Adventist.</li><li>Institution address: Athwalines, Surat - 395001, Gujarat.</li><li>AQAR 2022-2023 identifies the institution as affiliated, co-education, urban, self-financing, and functioning from its own campus.</li></ul><h2>Accreditation wording guardrail</h2><p>Older documents mention NAAC accreditation/B++ and the AQAR 2022-2023 lists prior Cycle 1 details. Do not claim current NAAC accreditation until a current certificate and validity document is uploaded and approved by admin.</p><h2>Compliance document rule</h2><p>Every AICTE, GTU, VNSGU, GNC, NAAC, IQAC, Mandatory Disclosure, Anti-Ragging, Grievance, Women Safety, SC/ST, and Student Counsellor claim must link to a document entry in the Document Center.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/governing_pdf/Governing%20Body90650.pdf",
+      "/documents/iqac/aqar-2022-23.pdf",
+      "https://suratcollege.metasofsda.in/affiliations-and-accreditation"
+    ]
+  },
+  "admissions": {
+    "title": "Admissions",
+    "summary": "Application links, eligibility, cancellation/refund policy, and program-wise admissions rules moved into one clear student funnel.",
+    "body": "<p>The live admissions page provides Apply Online and Quick Guide links. The rebuilt admissions area keeps those links while adding a secure first-party inquiry workflow, program eligibility cards, document checklist, and CMS-managed important dates.</p><h2>Cancellation and withdrawal policy summary</h2><p>Metas Adventist College considers cancellation/withdrawal requests when made according to prescribed regulations. The live policy states that the regulation is based on UGC Guidelines on Refund of Fees and Non-Retention of Original Certificates of October 2018 and is part of the admission regulations. It requires a prescribed cancellation/withdrawal form signed by the student and parent, and notes that refunds may be considered only for Academic Course Fee, not Application Fee or Admission Registration Fee.</p><p>If a student leaves mid-session after joining a course, the live policy states that the entire fees collected shall be forfeited. Admin must confirm the current fee/refund table before publishing exact current amounts.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/application-for-ug-pg/1/",
+      "https://suratcollege.metasofsda.in/cancellation-policy"
+    ],
+    "applyOnlineUrl": "https://forms.gle/",
+    "quickGuideUrl": "https://s3-ap-southeast-1.amazonaws.com/gtusitecirculars/uploads/Admission%20Guidelines%20for%20BBA%20with%20Honours-Honours%20with%20Research_922140.pdf"
+  },
+  "studentCorner": {
+    "title": "Student Corner",
+    "summary": "Academic calendar, conduct, examination, scholarships, induction, internship, placement, alumni, anti-ragging, grievance, women safety, and monitoring resources.",
+    "body": "<p>The live site exposes Student Corner sections for Academic Calendar, Code of Conduct, Examination, Scholarships, Student Induction, Internship, Placement, Recruiters, MOUs, Alumni, Activities, Anti-Ragging Cell, Grievance Cell, Women Sexual Harassment Cell, and Student Monitoring System.</p><p>The new CMS must keep these support cells visible, searchable, and document-backed. Committee PDFs such as SC/ST Committee and Student Counsellor documents must be listed as historical/current only after admin verifies their active year.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/iqac-members",
+      "https://suratcollege.metasofsda.in/affiliations-and-accreditation"
+    ]
+  },
+  "iqacAccreditation": {
+    "title": "IQAC / NAAC / Accreditation Document Center",
+    "summary": "AICTE, GTU, VNSGU, GNC, IQAC, NAAC, AQAR, Mandatory Disclosure, and institutional reports in a searchable library.",
+    "body": "<p>The live Affiliations & Accreditation page links current and historical compliance documents including AICTE EOA 2026-27, VNSGU Permission for B.Sc. Nursing, GNC Permission for GNM & B.Sc. Nursing, GTU BBA and MBA affiliation documents, AICTE EOA archives, AAA certificate, AQAR, NAAC, metric support files, Quick Guide, and AICTE Mandatory Disclosure.</p><p>The IQAC Reports page lists AQAR reports from 2023-2024 back to 2014-2015, annual reports, strategic plan 2023-2028, IQAC minutes, AQAR support documents, summer internship 2022-2023, and procedures/policies for maintenance.</p><p class=\"required\">AQAR 2023-2024 appears as a review/verification file. Admin must confirm the final accepted AQAR before displaying it as final.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/affiliations-and-accreditation",
+      "https://suratcollege.metasofsda.in/iqac-reports",
+      "https://suratcollege.metasofsda.in/iqac-members"
+    ]
+  },
+  "infrastructure": {
+    "title": "Infrastructure",
+    "summary": "Campus facilities migrated from the live menu with corrected spelling and admin-editable facility pages.",
+    "body": "<p>The live infrastructure menu includes Library, Students Centre, Hostel, Auditorium, Gymnasium, Computer Lab, Language Lab, Conference Hall, Play Ground, Lift, Fire Safety, Security, and Canteen. The rebuild corrects legacy spelling such as the legacy misspelling to “Auditorium”.</p><p class=\"required\">Detailed descriptions, current photos, timings, rules, and accessibility details require admin confirmation for each facility.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/institute-details"
+    ]
+  },
+  "contact": {
+    "title": "Contact Metas Adventist College",
+    "summary": "Official address, phone numbers, emails, hours, map, and department inquiry routing.",
+    "body": "<p>Registrar Office: 0261-7160215. Admission Enquiry: 95126 44385. Placement Cell: 0261-7159490 / 9723555799. Emails: principalcollege@metasofsda.in, registrarsurat@metasofsda.in, placementcell@metasofsda.in. Office hours: Monday to Friday, 09:00 am - 01:00 pm and 03:30 pm - 05:30 pm.</p>",
+    "sourceUrls": [
+      "https://suratcollege.metasofsda.in/contact.php",
+      "https://suratcollege.metasofsda.in/"
+    ]
+  }
+}

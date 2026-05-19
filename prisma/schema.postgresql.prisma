@@ -1,0 +1,427 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  username     String     @unique
+  email        String?    @unique
+  name         String?
+  passwordHash String
+  totpSecret   String?
+  totpEnabled  Boolean    @default(false)
+  recoveryCodes String?
+  status       String     @default("active")
+  roleId       String?
+  role         Role?      @relation(fields: [roleId], references: [id])
+  lastLoginAt  DateTime?
+  failedLogins Int        @default(0)
+  lockedUntil  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  sessions     Session[]
+  auditLogs    AuditLog[]
+  securityEvents SecurityEvent[]
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  users       User[]
+  permissions RolePermission[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  description String?
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  tokenHash    String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress    String?
+  userAgent    String?
+  fingerprint  String?
+  expiresAt    DateTime
+  lastActiveAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id])
+  action       String
+  entityType   String
+  entityId     String?
+  summary      String?
+  beforeValue  String?
+  afterValue   String?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+}
+
+model Page {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  summary         String?
+  body            String?
+  status          String        @default("published")
+  seoTitle        String?
+  seoDescription  String?
+  metadata        String        @default("{}")
+  createdBy       String?
+  updatedBy       String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  versions        PageVersion[]
+}
+
+model PageVersion {
+  id        String   @id @default(cuid())
+  pageId    String
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  version   Int
+  snapshot  String
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@unique([pageId, version])
+}
+
+model HomepageSection {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String?
+  subtitle  String?
+  body      String?
+  order     Int      @default(0)
+  visible   Boolean  @default(true)
+  status    String   @default("published")
+  settings  String   @default("{}")
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Program {
+  id               String   @id @default(cuid())
+  title            String
+  slug             String   @unique
+  category         String
+  status           String   @default("draft")
+  duration         String?
+  eligibility      String?
+  summary          String?
+  overview         String?
+  authorityNote    String?
+  admissionProcess String?
+  attendanceRules  String?
+  semesterStructure String?
+  careerOpportunities String?
+  faqs             String   @default("[]")
+  rules            String   @default("[]")
+  documents        String   @default("[]")
+  facultyIds       String   @default("[]")
+  image            String?
+  seoTitle         String?
+  seoDescription   String?
+  createdBy        String?
+  updatedBy        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Faculty {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  photo           String?
+  designation     String?
+  department      String?
+  qualification   String?
+  experience      String?
+  expertise       String?
+  bio             String?
+  publications    String   @default("[]")
+  contactEmail    String?
+  contactPhone    String?
+  contactVisible  Boolean  @default(false)
+  spotlight       Boolean  @default(false)
+  status          String   @default("published")
+  createdBy       String?
+  updatedBy       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Notice {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  category    String
+  date        DateTime?
+  expiryDate  DateTime?
+  status      String   @default("active")
+  program     String?
+  documentUrl String?
+  externalUrl String?
+  pinned      Boolean  @default(false)
+  body        String?
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Document {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  category       String?
+  authority      String
+  documentType   String
+  year           String?
+  academicYear   String?
+  program        String?
+  description    String?
+  tags           String   @default("[]")
+  status         String   @default("current")
+  visibility     String   @default("public")
+  fileUrl        String
+  fileSize       Int?
+  version        Int      @default(1)
+  replacedById   String?
+  downloadCount  Int      @default(0)
+  viewCount      Int      @default(0)
+  createdBy      String?
+  updatedBy      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model MediaAsset {
+  id          String   @id @default(cuid())
+  title       String
+  fileName    String
+  url         String   @unique
+  mimeType    String?
+  size        Int?
+  folder      String?
+  altText     String?
+  caption     String?
+  tags        String   @default("[]")
+  usageCount  Int      @default(0)
+  status      String   @default("active")
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  category    String?
+  summary     String?
+  body        String?
+  startDate   DateTime?
+  endDate     DateTime?
+  status      String   @default("draft")
+  image       String?
+  seoTitle    String?
+  seoDescription String?
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  summary     String?
+  body        String?
+  status      String   @default("draft")
+  image       String?
+  publishedAt DateTime?
+  seoTitle    String?
+  seoDescription String?
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model JobOpening {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  department  String?
+  employmentType String?
+  deadline    DateTime?
+  status      String   @default("draft")
+  description String?
+  eligibility String?
+  noticeUrl   String?
+  applicationUrl String?
+  createdBy   String?
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FormSubmission {
+  id          String   @id @default(cuid())
+  kind        String
+  status      String   @default("new")
+  name        String?
+  phone       String?
+  email       String?
+  program     String?
+  message     String?
+  data        String   @default("{}")
+  sourcePage  String?
+  utmSource   String?
+  ipAddress   String?
+  userAgent   String?
+  spamScore   Int      @default(0)
+  assignedTo  String?
+  notes       String?
+  consent     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdmissionLead {
+  id          String   @id @default(cuid())
+  studentName String
+  parentName  String?
+  phone       String
+  whatsapp    String?
+  email       String?
+  city        String?
+  program     String?
+  qualification String?
+  message     String?
+  sourcePage  String?
+  utmSource   String?
+  status      String   @default("new")
+  assignedTo  String?
+  notes       String?
+  followUpAt  DateTime?
+  duplicateOf String?
+  consent     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RecruiterInquiry {
+  id          String   @id @default(cuid())
+  company     String
+  contactPerson String?
+  designation String?
+  phone       String?
+  email       String?
+  hiringRequirement String?
+  programInterest String?
+  message     String?
+  status      String   @default("new")
+  consent     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AlumniRegistration {
+  id          String   @id @default(cuid())
+  name        String
+  graduationYear String?
+  program     String?
+  profession  String?
+  company     String?
+  phone       String?
+  email       String?
+  linkedIn    String?
+  message     String?
+  status      String   @default("new")
+  consent     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ContactInquiry {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String?
+  email       String?
+  inquiryType String
+  message     String?
+  status      String   @default("new")
+  consent     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  label       String?
+  group       String?
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  event       String
+  path        String?
+  label       String?
+  value       String?
+  metadata    String   @default("{}")
+  sessionId   String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
+
+model SecurityEvent {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  event       String
+  severity    String   @default("info")
+  summary     String?
+  ipAddress   String?
+  userAgent   String?
+  metadata    String   @default("{}")
+  createdAt   DateTime @default(now())
+}

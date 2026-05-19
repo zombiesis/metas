@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://suratcollege.metasofsda.in/sitemap.xml

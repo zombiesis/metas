@@ -1,0 +1,112 @@
+[
+  {
+    "name": "Ms. Namrata S. Chauhan",
+    "slug": "namrata-s-chauhan",
+    "department": "Nursing",
+    "qualification": "PB B.Sc.",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "photo": "/assets/images/faculty/namrata-s-chauhan.webp",
+    "spotlight": true
+  },
+  {
+    "name": "Ms. Tanvi Pareshkumar Botare",
+    "slug": "tanvi-pareshkumar-botare",
+    "department": "Nursing",
+    "qualification": "B.Sc. (Nursing)",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "photo": "/assets/images/faculty/tanvi-pareshkumar-botare.webp",
+    "spotlight": true
+  },
+  {
+    "name": "Mr. Pratham Arunbhai Bhoi",
+    "slug": "pratham-arunbhai-bhoi",
+    "department": "Nursing",
+    "qualification": "B.Sc. (Nursing)",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "photo": "/assets/images/faculty/pratham-arunbhai-bhoi.webp",
+    "spotlight": true
+  },
+  {
+    "name": "Ms. Aayushi Pareshbhai Master",
+    "slug": "aayushi-pareshbhai-master",
+    "department": "Nursing",
+    "qualification": "B.Sc. (Nursing)",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "photo": "/assets/images/faculty/aayushi-pareshbhai-master.webp",
+    "spotlight": false
+  },
+  {
+    "name": "Ms. Nimmy Syam",
+    "slug": "nimmy-syam",
+    "department": "Nursing",
+    "qualification": "B.Sc. (Nursing), M.Sc. (OBG), M.A. (Soc)",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "photo": "/assets/images/faculty/nimmy-syam.webp",
+    "spotlight": true
+  },
+  {
+    "name": "Ms. Monica Sridhar Bodugu",
+    "slug": "monica-sridhar-bodugu",
+    "department": "Nursing",
+    "qualification": "B.Sc. (Nursing)",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "photo": "/assets/images/faculty/monica-sridhar-bodugu.webp",
+    "spotlight": false
+  },
+  {
+    "name": "Mr. Koteshwar Laxmaiah Boddulla",
+    "slug": "koteshwar-laxmaiah-boddulla",
+    "department": "Nursing",
+    "qualification": "B.Sc. (Nursing)",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "photo": "/assets/images/faculty/koteshwar-laxmaiah-boddulla.webp",
+    "spotlight": false
+  },
+  {
+    "name": "Dr. Srikakolli Eliah",
+    "slug": "dr-srikakolli-eliah",
+    "department": "Administration",
+    "qualification": "PhD (as referenced in newsletters/search-indexed public documents)",
+    "designation": "Principal",
+    "photo": "/assets/images/director-placeholder-verified-source.webp",
+    "verification": "AQAR 2022-2023 lists Head of the Institution as DR. SRIKAKOLLI ELIAH, Designation PRINCIPAL. Admin must upload approved portrait.",
+    "experience": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "expertise": "Institutional leadership",
+    "bio": "Principal details are document-backed from AQAR 2022-2023. Public designation must be confirmed by admin before final launch.",
+    "contactEmail": "principalcollege@metasofsda.in",
+    "contactPhone": "02617160217",
+    "contactVisible": false,
+    "spotlight": true,
+    "status": "published"
+  },
+  {
+    "name": "Ms. Victoria Philip Lucas",
+    "slug": "victoria-philip-lucas",
+    "department": "Management",
+    "qualification": "MBA (Marketing), NEHU University, 2020; BBA (Finance), NEHU University, 2016",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "verification": "Migrated from live Research & Development Data page; admin must confirm current employment/designation before publishing broadly.",
+    "spotlight": false,
+    "status": "draft"
+  },
+  {
+    "name": "Mr. Prabir Ghosh",
+    "slug": "prabir-ghosh",
+    "department": "Management",
+    "qualification": "MBA, MA (Economics), B.Com, B.Ed as listed on live R&D Data page",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "verification": "Migrated from live Research & Development Data page; admin must confirm current employment/designation before publishing broadly.",
+    "spotlight": false,
+    "status": "draft"
+  },
+  {
+    "name": "Ms. Surabhi Sugathan",
+    "slug": "surabhi-sugathan",
+    "department": "Management",
+    "qualification": "Ph.D pursuing, M.Com, MBA, B.Com as listed on live R&D Data page",
+    "designation": "[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]",
+    "verification": "Migrated from live Research & Development Data page; admin must confirm current employment/designation before publishing broadly.",
+    "spotlight": false,
+    "status": "draft"
+  }
+]

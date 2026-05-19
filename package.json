@@ -1,0 +1,61 @@
+{
+  "name": "metas-adventist-college-enterprise-cms-real-content-v4",
+  "version": "4.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "description": "Enterprise Next.js + Prisma CMS upgrade for Metas Adventist College with real live-site institutional content, legal/compliance context, visual admin, analytics, audit logs, RBAC, security and WAF documentation.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "content:check": "node scripts/content-check.mjs",
+    "sitemap": "node scripts/generate-sitemap.mjs",
+    "admin:hash-password": "node scripts/hash-password.mjs",
+    "admin:cleanup": "tsx scripts/cleanup-sessions.ts",
+    "verify:enterprise": "node scripts/verify-enterprise-upgrade.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "5.22.0",
+    "bcryptjs": "3.0.3",
+    "next": "16.2.6",
+    "pino": "9.6.0",
+    "qrcode": "1.5.4",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "sanitize-html": "2.15.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@tailwindcss/postcss": "4.3.0",
+    "@types/bcryptjs": "3.0.0",
+    "@types/node": "25.7.0",
+    "@types/qrcode": "1.5.5",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@types/sanitize-html": "2.13.0",
+    "eslint": "9.39.4",
+    "eslint-config-next": "16.2.6",
+    "postcss": "8.5.14",
+    "prisma": "5.22.0",
+    "tailwindcss": "4.3.0",
+    "tsx": "4.21.0",
+    "typescript": "6.0.3",
+    "vitest": "^3.2.1"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Metas Adventist College CMS Admin API",
+    "version": "4.0.0",
+    "description": "Enterprise CMS API for content management, authentication, and security."
+  },
+  "servers": [{ "url": "http://localhost:3000", "description": "Development" }],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "tags": ["System"],
+        "responses": {
+          "200": { "description": "Healthy", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HealthResponse" } } } },
+          "503": { "description": "Degraded" }
+        }
+      }
+    },
+    "/api/admin/login": {
+      "post": {
+        "summary": "Admin login",
+        "tags": ["Auth"],
+        "requestBody": { "content": { "multipart/form-data": { "schema": { "type": "object", "properties": { "username": { "type": "string" }, "password": { "type": "string" } }, "required": ["username", "password"] } } } },
+        "responses": { "303": { "description": "Redirect to dashboard or 2FA verification" } }
+      }
+    },
+    "/api/admin/verify-2fa": {
+      "post": {
+        "summary": "Verify 2FA token",
+        "tags": ["Auth"],
+        "requestBody": { "content": { "multipart/form-data": { "schema": { "type": "object", "properties": { "token": { "type": "string", "pattern": "^\\d{6}$" } }, "required": ["token"] } } } },
+        "responses": { "303": { "description": "Redirect to dashboard on success" } }
+      }
+    },
+    "/api/admin/logout": {
+      "post": { "summary": "Logout", "tags": ["Auth"], "security": [{ "session": [] }], "responses": { "303": { "description": "Redirect to login" } } }
+    },
+    "/api/admin/password": {
+      "post": {
+        "summary": "Change password",
+        "tags": ["Auth"],
+        "security": [{ "session": [] }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "currentPassword": { "type": "string" }, "newPassword": { "type": "string", "minLength": 12 } }, "required": ["currentPassword", "newPassword"] } } } },
+        "responses": { "200": { "description": "Password changed" }, "403": { "description": "Wrong current password" }, "422": { "description": "Weak password" } }
+      }
+    },
+    "/api/admin/2fa": {
+      "get": { "summary": "Generate 2FA setup (secret + QR)", "tags": ["2FA"], "security": [{ "session": [] }], "responses": { "200": { "description": "Secret and QR data URL" } } },
+      "post": {
+        "summary": "Enable or disable 2FA",
+        "tags": ["2FA"],
+        "security": [{ "session": [] }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "action": { "type": "string", "enum": ["disable"] }, "secret": { "type": "string" }, "token": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "2FA enabled/disabled, recovery codes returned on enable" } }
+      }
+    },
+    "/api/admin/sessions": {
+      "get": { "summary": "List active sessions", "tags": ["Sessions"], "security": [{ "session": [] }], "responses": { "200": { "description": "Session list" } } },
+      "delete": { "summary": "Revoke sessions", "tags": ["Sessions"], "security": [{ "session": [] }], "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "sessionId": { "type": "string" } } } } } }, "responses": { "200": { "description": "Sessions revoked" } } }
+    },
+    "/api/admin/cms/{collection}": {
+      "get": {
+        "summary": "List collection records (paginated)",
+        "tags": ["CMS"],
+        "security": [{ "session": [] }],
+        "parameters": [
+          { "name": "collection", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50, "maximum": 200 } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Paginated records with meta", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PaginatedResponse" } } } } }
+      },
+      "post": {
+        "summary": "Create record",
+        "tags": ["CMS"],
+        "security": [{ "session": [] }],
+        "parameters": [{ "name": "collection", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "data": { "type": "object" } }, "required": ["data"] } } } },
+        "responses": { "200": { "description": "Created record" }, "422": { "description": "Validation error", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ValidationError" } } } } }
+      },
+      "put": {
+        "summary": "Update record",
+        "tags": ["CMS"],
+        "security": [{ "session": [] }],
+        "parameters": [{ "name": "collection", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" }, "data": { "type": "object" } }, "required": ["id", "data"] } } } },
+        "responses": { "200": { "description": "Updated record" }, "422": { "description": "Validation error" } }
+      },
+      "delete": {
+        "summary": "Delete record (soft-delete for content)",
+        "tags": ["CMS"],
+        "security": [{ "session": [] }],
+        "parameters": [{ "name": "collection", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "id": { "type": "string" } }, "required": ["id"] } } } },
+        "responses": { "200": { "description": "Deleted" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "session": { "type": "apiKey", "in": "cookie", "name": "metas_admin_session" }
+    },
+    "schemas": {
+      "HealthResponse": { "type": "object", "properties": { "status": { "type": "string", "enum": ["healthy", "degraded"] }, "db": { "type": "boolean" }, "uptime": { "type": "number" }, "latencyMs": { "type": "number" } } },
+      "PaginatedResponse": { "type": "object", "properties": { "ok": { "type": "boolean" }, "collection": { "type": "string" }, "data": { "type": "array", "items": { "type": "object" } }, "meta": { "type": "object", "properties": { "page": { "type": "integer" }, "limit": { "type": "integer" }, "total": { "type": "integer" }, "totalPages": { "type": "integer" } } } } },
+      "ValidationError": { "type": "object", "properties": { "ok": { "type": "boolean", "enum": [false] }, "error": { "type": "string" }, "fields": { "type": "object", "additionalProperties": { "type": "string" } } } }
+    }
+  }
+}

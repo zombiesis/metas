@@ -1,0 +1,1 @@
+export default function Page(){return <section className="pagehero"><div className="wrap"><p className="eyebrow">Careers</p><h1>HR Department</h1><p>[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT] Add HR contact and recruitment policy.</p></div></section>}

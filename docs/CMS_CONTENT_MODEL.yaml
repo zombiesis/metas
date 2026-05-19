@@ -1,0 +1,53 @@
+EnterpriseCMS:
+  database: Prisma
+  developmentDatabase: SQLite
+  productionDatabase: PostgreSQL
+  models:
+    User:
+      fields: [id, username, email, name, passwordHash, status, roleId, lastLoginAt, failedLogins, lockedUntil, createdAt, updatedAt]
+    Role:
+      fields: [id, name, description, createdAt, updatedAt]
+    Permission:
+      fields: [id, key, description]
+    Session:
+      fields: [id, tokenHash, userId, ipAddress, userAgent, expiresAt, createdAt]
+    AuditLog:
+      fields: [id, userId, action, entityType, entityId, summary, beforeValue, afterValue, ipAddress, userAgent, createdAt]
+    Page:
+      fields: [id, slug, title, summary, body, status, seoTitle, seoDescription, metadata, createdBy, updatedBy, createdAt, updatedAt]
+    PageVersion:
+      fields: [id, pageId, version, snapshot, createdBy, createdAt]
+    HomepageSection:
+      fields: [id, key, title, subtitle, body, order, visible, status, settings, createdBy, updatedBy, createdAt, updatedAt]
+    Program:
+      fields: [id, title, slug, category, status, duration, eligibility, summary, overview, authorityNote, admissionProcess, attendanceRules, semesterStructure, careerOpportunities, faqs, rules, documents, facultyIds, image, seoTitle, seoDescription, createdBy, updatedBy, createdAt, updatedAt]
+    Faculty:
+      fields: [id, name, slug, photo, designation, department, qualification, experience, expertise, bio, publications, contactEmail, contactPhone, contactVisible, spotlight, status, createdBy, updatedBy, createdAt, updatedAt]
+    Notice:
+      fields: [id, title, slug, category, date, expiryDate, status, program, documentUrl, externalUrl, pinned, body, createdBy, updatedBy, createdAt, updatedAt]
+    Document:
+      fields: [id, title, slug, category, authority, documentType, year, academicYear, program, description, tags, status, visibility, fileUrl, fileSize, version, replacedById, downloadCount, viewCount, createdBy, updatedBy, createdAt, updatedAt]
+    MediaAsset:
+      fields: [id, title, fileName, url, mimeType, size, folder, altText, caption, tags, usageCount, status, createdBy, updatedBy, createdAt, updatedAt]
+    Event:
+      fields: [id, title, slug, category, summary, body, startDate, endDate, status, image, seoTitle, seoDescription, createdBy, updatedBy, createdAt, updatedAt]
+    BlogPost:
+      fields: [id, title, slug, summary, body, status, image, publishedAt, seoTitle, seoDescription, createdBy, updatedBy, createdAt, updatedAt]
+    JobOpening:
+      fields: [id, title, slug, department, employmentType, deadline, status, description, eligibility, noticeUrl, applicationUrl, createdBy, updatedBy, createdAt, updatedAt]
+    FormSubmission:
+      fields: [id, kind, status, name, phone, email, program, message, data, sourcePage, utmSource, ipAddress, userAgent, spamScore, assignedTo, notes, consent, createdAt, updatedAt]
+    AdmissionLead:
+      fields: [id, studentName, parentName, phone, whatsapp, email, city, program, qualification, message, sourcePage, utmSource, status, assignedTo, notes, followUpAt, duplicateOf, consent, createdAt, updatedAt]
+    RecruiterInquiry:
+      fields: [id, company, contactPerson, designation, phone, email, hiringRequirement, programInterest, message, status, consent, createdAt, updatedAt]
+    AlumniRegistration:
+      fields: [id, name, graduationYear, program, profession, company, phone, email, linkedIn, message, status, consent, createdAt, updatedAt]
+    ContactInquiry:
+      fields: [id, name, phone, email, inquiryType, message, status, consent, createdAt, updatedAt]
+    SiteSetting:
+      fields: [id, key, value, label, group, updatedBy, createdAt, updatedAt]
+    AnalyticsEvent:
+      fields: [id, event, path, label, value, metadata, sessionId, ipAddress, userAgent, createdAt]
+    SecurityEvent:
+      fields: [id, userId, event, severity, summary, ipAddress, userAgent, metadata, createdAt]

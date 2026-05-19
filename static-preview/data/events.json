@@ -1,0 +1,24 @@
+[
+  {
+    "title": "GTU Group Reading",
+    "slug": "gtu-group-reading",
+    "category": "Academic Event",
+    "summary": "Live event detail thanks Gujarat Technological University and college leadership/faculty for Book Lovers’ Festival group reading activity.",
+    "body": "Migrated as a historical/current content candidate from live site. Admin should review date, photos, and publish status.",
+    "startDate": "2024-01-01",
+    "status": "draft",
+    "sourceUrl": "https://suratcollege.metasofsda.in/events-detail/GTU-Group-Reading",
+    "image": "/assets/images/campus-life.webp"
+  },
+  {
+    "title": "Entrepreneurship and Soft Skills Development",
+    "slug": "entrepreneurship-and-soft-skills-development",
+    "category": "Placement / Skills",
+    "summary": "Live event detail references entrepreneurship and soft skills development activity at Metas Adventist College.",
+    "body": "Migrated as content candidate; admin must verify date, photos, and final copy before publishing.",
+    "startDate": "2018-01-01",
+    "status": "archived",
+    "sourceUrl": "https://suratcollege.metasofsda.in/events-detail/entrepreneurship-and-soft-skills-development-in-metas-adventist-college",
+    "image": "/assets/images/classroom.webp"
+  }
+]

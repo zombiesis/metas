@@ -1,0 +1,1 @@
+export default function Page(){return <section className="pagehero"><div className="wrap"><p className="eyebrow">Research</p><h1>R&D Data</h1><p>[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT] Upload verified data and reports.</p></div></section>}
