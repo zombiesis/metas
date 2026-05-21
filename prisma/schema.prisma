@@ -536,6 +536,7 @@ model BranchSettings {
   footerText   String?
   features     String @default("{}")
   customCss    String?
+  cfPlan       String @default("free")
   updatedAt    DateTime @updatedAt
 }
 
