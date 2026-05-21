@@ -8,6 +8,7 @@ import { NotificationBell } from '@/components/admin/NotificationBell';
 import { Breadcrumb } from '@/components/admin/Breadcrumb';
 import { LanguageToggle } from '@/components/admin/LanguageToggle';
 import { BranchSwitcher } from '@/components/admin/BranchSwitcher';
+import { AdminNotifications } from '@/components/admin/AdminNotifications';
 import { OnboardingTips } from '@/components/admin/OnboardingTips';
 import { CommandPalette } from '@/components/admin/CommandPalette';
 import { AdminErrorBoundary } from '@/components/admin/AdminErrorBoundary';
@@ -193,6 +194,7 @@ export function AdminChrome({ title, eyebrow = 'Enterprise CMS', description, us
           {children}
         </AdminErrorBoundary>
         <OnboardingTips />
+        <AdminNotifications />
         <CommandPalette />
       </div>
     </section>

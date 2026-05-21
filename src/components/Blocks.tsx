@@ -227,3 +227,29 @@ export function DetailList({ items }: { items: Array<[string, string | undefined
     </dl>
   );
 }
+
+
+/** Render page builder blocks from metadata JSON */
+export function PageBlockRenderer({ metadata }: { metadata: string }) {
+  let blocks: any[] = [];
+  try { const parsed = JSON.parse(metadata); blocks = parsed.blocks || []; } catch { return null; }
+  if (!blocks.length) return null;
+
+  return (
+    <div className="page-blocks">
+      {blocks.filter((b: any) => b.visible !== false).sort((a: any, b: any) => a.order - b.order).map((block: any) => (
+        <section key={block.id} className={`block block-${block.type}`}>
+          {block.type === 'hero' && <div className="pagehero"><div className="wrap"><h1>{block.data.title}</h1>{block.data.subtitle && <p>{block.data.subtitle}</p>}{block.data.cta && <a className="btn gold" href={block.data.ctaUrl || '#'}>{block.data.cta}</a>}</div></div>}
+          {block.type === 'text' && <div className="section"><div className="wrap">{block.data.heading && <h2>{block.data.heading}</h2>}<div className="content" dangerouslySetInnerHTML={{ __html: (block.data.body || '').replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') }} /></div></div>}
+          {block.type === 'cta' && <div className="section" style={{ textAlign: 'center' }}><div className="wrap"><h2>{block.data.heading}</h2>{block.data.description && <p>{block.data.description}</p>}<a className={`btn ${block.data.variant === 'outline' ? 'outline' : 'gold'}`} href={block.data.buttonUrl}>{block.data.buttonText}</a></div></div>}
+          {block.type === 'stats' && <div className="section"><div className="wrap">{block.data.heading && <h2>{block.data.heading}</h2>}<div className="kpi-grid">{(block.data.items || []).map((s: any, i: number) => <div key={i} className="kpi-card"><span className="kpi-value">{s.value}{s.suffix || ''}</span><span className="kpi-label">{s.label}</span></div>)}</div></div></div>}
+          {block.type === 'faq' && <div className="section"><div className="wrap">{block.data.heading && <h2>{block.data.heading}</h2>}<div>{(block.data.items || []).map((f: any, i: number) => <details key={i}><summary>{f.question}</summary><p>{f.answer}</p></details>)}</div></div></div>}
+          {block.type === 'gallery' && <div className="section"><div className="wrap">{block.data.heading && <h2>{block.data.heading}</h2>}<div className="grid two">{(block.data.images || []).map((img: any, i: number) => <figure key={i}><img src={img.url} alt={img.alt || ''} loading="lazy" />{img.caption && <figcaption>{img.caption}</figcaption>}</figure>)}</div></div></div>}
+          {block.type === 'video' && <div className="section"><div className="wrap">{block.data.heading && <h2>{block.data.heading}</h2>}<div style={{ position: 'relative', paddingBottom: '56.25%' }}><iframe src={block.data.url} style={{ position: 'absolute', width: '100%', height: '100%' }} allowFullScreen title={block.data.heading || 'Video'} /></div></div></div>}
+          {block.type === 'testimonial' && <div className="section"><div className="wrap">{block.data.heading && <h2>{block.data.heading}</h2>}<div className="grid two">{(block.data.items || []).map((t: any, i: number) => <blockquote key={i} className="card"><p>"{t.quote}"</p><footer><strong>{t.name}</strong>{t.role && <span> — {t.role}</span>}</footer></blockquote>)}</div></div></div>}
+          {block.type === 'cards' && <div className="section"><div className="wrap">{block.data.heading && <h2>{block.data.heading}</h2>}<div className="grid two">{(block.data.items || []).map((c: any, i: number) => <article key={i} className="card">{c.image && <img src={c.image} alt={c.title} loading="lazy" />}<h3>{c.title}</h3>{c.description && <p>{c.description}</p>}{c.link && <a href={c.link}>Learn more →</a>}</article>)}</div></div></div>}
+        </section>
+      ))}
+    </div>
+  );
+}

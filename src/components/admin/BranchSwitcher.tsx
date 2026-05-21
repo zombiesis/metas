@@ -8,17 +8,15 @@ export function BranchSwitcher() {
   const [current, setCurrent] = useState('');
 
   useEffect(() => {
-    const saved = document.cookie.match(/metas_branch=([^;]+)/)?.[1] || '';
-    setCurrent(saved);
     fetch('/api/admin/branches').then(r => r.json()).then(d => {
       if (d.ok) setBranches(d.branches);
     }).catch(() => {});
   }, []);
 
   function switchBranch(branchId: string) {
-    document.cookie = `metas_branch=${branchId};path=/;max-age=${60 * 60 * 24 * 365}`;
-    setCurrent(branchId);
-    window.location.reload();
+    fetch('/api/admin/branches/switch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ branchId }) })
+      .then(r => r.json())
+      .then(d => { if (d.ok) { setCurrent(branchId); window.location.reload(); } });
   }
 
   if (branches.length <= 1) return null;

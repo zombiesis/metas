@@ -13,10 +13,11 @@ type RecordMap = Record<string, any>;
 function StatusBadge({ value }: { value: any }) {
   const text = String(value || '').toLowerCase();
   if (!text) return null;
-  const cls = text === 'published' || text === 'active' || text === 'info' ? 'badge-active'
+  const cls = text === 'published' || text === 'active' || text === 'info' || text === 'enrolled' ? 'badge-active'
     : text === 'draft' || text === 'warning' ? 'badge-draft'
+    : text === 'review' || text === 'contacted' ? 'badge-review'
     : text === 'new' ? 'badge-new'
-    : text === 'archived' || text === 'expired' || text === 'inactive' || text === 'critical' || text === 'suspended' ? 'badge-archived'
+    : text === 'archived' || text === 'expired' || text === 'inactive' || text === 'critical' || text === 'suspended' || text === 'closed' ? 'badge-archived'
     : '';
   return <span className={`badge ${cls}`}>{text}</span>;
 }
@@ -125,6 +126,7 @@ export function AdminCrudClient({ config, initialRecords }: { config: AdminColle
   const [selectedId, setSelectedId] = useState<string | 'new'>(records[0]?.id || 'new');
   const [draft, setDraft] = useState<RecordMap>(records[0] || emptyRecord(config.fields));
   const [query, setQuery] = useState('');
+  const [customFields, setCustomFields] = useState<any[]>([]);
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [message, setMessage] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -141,6 +143,11 @@ export function AdminCrudClient({ config, initialRecords }: { config: AdminColle
     const timer = setTimeout(() => setDebouncedQuery(query), 300);
     return () => clearTimeout(timer);
   }, [query]);
+
+  // Fetch custom fields for this collection
+  useEffect(() => {
+    fetch(`/api/admin/custom-fields?collection=${config.collection}`).then(r => r.json()).then(d => { if (d.ok) setCustomFields(d.fields); }).catch(() => {});
+  }, [config.collection]);
 
   // Warn on unsaved changes
   useEffect(() => {
@@ -342,6 +349,7 @@ export function AdminCrudClient({ config, initialRecords }: { config: AdminColle
           ) : (
             config.fields.map((field) => <FormField key={field.name} field={field} record={draft} onChange={update} error={fieldErrors[field.name]} />)
           )}
+          {customFields.length > 0 && <fieldset style={{ borderTop: '1px solid #eee', marginTop: 16, paddingTop: 16 }}><legend style={{ fontSize: '0.85rem', color: '#666' }}>Custom Fields</legend>{customFields.map((cf: any) => <FormField key={cf.name} field={{ name: `custom_${cf.name}`, label: cf.label, type: cf.type === 'textarea' ? 'richtext' : cf.type === 'boolean' ? 'checkbox' : 'text', required: cf.required }} record={draft} onChange={update} error={undefined} />)}</fieldset>}
           {message ? <p className={`admin-toast ${message.includes('Saved') || message.includes('Deleted') ? 'toast-success' : message.includes('failed') || message.includes('error') ? 'toast-error' : 'toast-info'}`} role="status">{message}</p> : null}
         </form>
       </div>

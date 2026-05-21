@@ -27,6 +27,10 @@ export async function resolveBranchByDomain(domain: string): Promise<string | nu
 /** Get the current branch ID from request host (resolved via domain lookup) */
 export async function getCurrentBranchId(): Promise<string | null> {
   const h = await headers();
+  // For admin routes: check httpOnly branch cookie (set by server-side switch API)
+  const adminBranch = h.get('cookie')?.match(/metas_admin_branch=([^;]+)/)?.[1];
+  if (adminBranch) return adminBranch;
+  // For public routes: resolve from domain
   const host = h.get('x-branch-host') || h.get('host')?.split(':')[0] || 'localhost';
   return resolveBranchByDomain(host);
 }
