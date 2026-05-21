@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
+import { requireAdminApi } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  const auth = await requireAdminApi();
+  if (auth.response) return auth.response;
   const docs = {
     name: 'Metas CMS API',
     version: '4.0.0',

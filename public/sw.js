@@ -18,9 +18,9 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET, admin, and API requests
+  // Skip non-GET and internal requests
   if (request.method !== 'GET') return;
-  if (url.pathname.startsWith('/admin') || url.pathname.startsWith('/api/')) return;
+  if (url.pathname.startsWith('/api/')) return;
 
   // Network-first for HTML pages
   if (request.headers.get('accept')?.includes('text/html')) {

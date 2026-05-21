@@ -18,6 +18,12 @@ export async function POST(request: NextRequest) {
   const { message, history } = await request.json();
   if (!message || message.length > 500) return NextResponse.json({ ok: false, error: 'Message required (max 500 chars)' }, { status: 400 });
 
+  // Block prompt injection via history — only allow user/assistant roles, cap length
+  const safeHistory = (Array.isArray(history) ? history : [])
+    .filter((m: any) => m.role === 'user' || m.role === 'assistant')
+    .slice(-4)
+    .map((m: any) => ({ role: m.role, content: String(m.content || '').slice(0, 300) }));
+
   // Resolve branch for context
   const h = await headers();
   const host = h.get('host')?.split(':')[0] || 'localhost';
@@ -43,7 +49,7 @@ export async function POST(request: NextRequest) {
   // Call OpenAI
   const messages = [
     { role: 'system', content: `You are a helpful admissions assistant for Metas Adventist College, Surat. Answer questions using ONLY the following information. Be concise and friendly. If you don't know, say "Please contact our admissions office at +91 95126 44385."\n\nCollege Info:\n${context}` },
-    ...(history || []).slice(-4),
+    ...(safeHistory),
     { role: 'user', content: message },
   ];
 

@@ -68,10 +68,12 @@ function checkApiRate(ip: string): { ok: boolean; remaining: number; reset: numb
 }
 
 function getIp(request: NextRequest): string {
-  if (process.env.TRUST_PROXY === 'cloudflare') {
-    return request.headers.get('cf-connecting-ip') || request.headers.get('x-real-ip') || 'unknown';
-  }
-  return request.headers.get('x-real-ip') || 'unknown';
+  // ONLY trust headers when explicitly configured with a trusted proxy
+  const trustProxy = process.env.TRUST_PROXY;
+  if (trustProxy === 'cloudflare') return request.headers.get('cf-connecting-ip') || '0.0.0.0';
+  if (trustProxy === 'nginx') return request.headers.get('x-real-ip') || '0.0.0.0';
+  // No trusted proxy: use connection IP (unavailable in edge, use fallback)
+  return '0.0.0.0'; // In production, MUST set TRUST_PROXY
 }
 
 function isPublicAdminPath(pathname: string) {
@@ -182,7 +184,6 @@ export function middleware(request: NextRequest) {
     "form-action 'self' https://docs.google.com"
   ].join('; ');
   response.headers.set('Content-Security-Policy', csp);
-  response.headers.set('x-nonce', nonce);
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
