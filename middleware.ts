@@ -93,6 +93,17 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const ip = getIp(request);
   const isAdmin = pathname.startsWith('/admin') || pathname.startsWith('/api/admin');
+  const isStudent = pathname.startsWith('/student') || pathname.startsWith('/api/student');
+
+  // Block source map requests in production
+  if (pathname.endsWith('.map')) {
+    return new NextResponse('Not found', { status: 404 });
+  }
+
+  // Block direct access to internal API structure discovery
+  if (pathname === '/api' || pathname === '/api/') {
+    return new NextResponse('Not found', { status: 404 });
+  }
 
   // DDoS: Global rate limit on ALL requests (blocks abusive IPs site-wide)
   if (!checkGlobalRate(ip)) {
@@ -183,6 +194,11 @@ export function middleware(request: NextRequest) {
   if (isAdmin) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  } else if (isStudent) {
+    // Student routes: maximum security headers
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
   } else if (pathname.startsWith('/uploads/') || pathname.startsWith('/assets/')) {
     response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
   } else if (!pathname.startsWith('/api/')) {
