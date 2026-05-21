@@ -12,6 +12,7 @@ import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import { PageTransition } from '@/components/PageTransition';
 import { ScrollAnimations } from '@/components/ScrollAnimations';
 import { CookieConsent } from '@/components/CookieConsent';
+import { ChatbotWidget } from '@/components/ChatbotWidget';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
@@ -59,6 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collegeSchema(site)) }} />
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <CookieConsent />
+        <ChatbotWidget />
       </body>
     </html>
   );
