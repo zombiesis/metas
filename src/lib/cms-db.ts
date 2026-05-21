@@ -236,6 +236,27 @@ export async function getPrograms(): Promise<Program[]> {
 }
 
 export async function getValueAddedCourses(): Promise<ValueAddedCourse[]> {
+  // Audit-#2 N20: previously JSON-only, so anything an admin edited through
+  // `/api/admin/cms/value-added-courses` never reached the public site. Now
+  // backed by a real Prisma model; falls through to the bundled JSON only on
+  // a fresh install before the seeder has run.
+  try {
+    const where = await scopedWhere({ deletedAt: null });
+    const rows = await prisma.valueAddedCourse.findMany({ where, orderBy: [{ category: 'asc' }, { title: 'asc' }] });
+    if (rows.length) {
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        slug: row.slug,
+        category: row.category,
+        duration: row.duration || '',
+        eligibility: row.eligibility || '',
+        summary: row.summary || '',
+        image: row.image || undefined,
+        status: row.status,
+      }));
+    }
+  } catch {}
   return readFallback<ValueAddedCourse[]>('value-added-courses', []);
 }
 

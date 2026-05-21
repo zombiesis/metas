@@ -31,10 +31,16 @@ export async function GET() {
   return NextResponse.json({ ok: true, plugins });
 }
 
-/** POST: install, uninstall, toggle, or update settings */
+/** POST: install, uninstall, toggle, or update settings (Super Admin only) */
 export async function POST(request: NextRequest) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
+  // Plugin snippets render raw HTML on every public page. Audit-#2 N9 narrowed
+  // the interpolation escape, but the cleanest defence is to keep this gate
+  // tight: only Super Admins can install / configure plugins.
+  if (auth.session!.roleName !== 'Super Admin') {
+    return NextResponse.json({ ok: false, error: 'Only Super Admin can manage plugins' }, { status: 403 });
+  }
   if (!await can(auth.session!.roleName, 'manage_security')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
 
   const { action, pluginId, settings } = await request.json();

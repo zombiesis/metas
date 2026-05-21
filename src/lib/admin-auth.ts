@@ -168,7 +168,7 @@ export async function verifyAdminSession(token?: string | null): Promise<AdminSe
       const ua = reqHeaders.get('user-agent') || 'unknown';
       const currentFp = sessionFingerprint(ip, ua);
       if (currentFp !== session.fingerprint) {
-        await prisma.session.delete({ where: { id: session.id } }).catch(() => null);
+        await prisma.session.deleteMany({ where: { id: session.id, userId: session.user.id } }).catch(() => null);
         await logSecurityEvent({ event: 'session_fingerprint_mismatch', severity: 'critical', summary: `Session hijack attempt for ${session.user.username}`, userId: session.user.id });
         return null;
       }
@@ -178,7 +178,7 @@ export async function verifyAdminSession(token?: string | null): Promise<AdminSe
   // Idle timeout
   const lastActivity = session.lastActiveAt ?? session.createdAt;
   if (Date.now() - lastActivity.getTime() > SESSION_IDLE_TIMEOUT_MS) {
-    await prisma.session.delete({ where: { id: session.id } }).catch(() => null);
+    await prisma.session.deleteMany({ where: { id: session.id, userId: session.user.id } }).catch(() => null);
     return null;
   }
 
@@ -218,7 +218,10 @@ export async function setSessionCookie(response: NextResponse, userId: string, r
 export async function clearSessionCookie(response: NextResponse) {
   const store = await cookies();
   const parsed = parseCookieToken(store.get(SESSION_COOKIE)?.value);
-  if (parsed) await prisma.session.delete({ where: { id: parsed.sessionId } }).catch(() => null);
+  // Use deleteMany for consistency with the rest of the file (audit-#2 N23).
+  // The cookie's HMAC was already verified by the time the user could call us
+  // for any sensible purpose; even if not, deleting a session by id is harmless.
+  if (parsed) await prisma.session.deleteMany({ where: { id: parsed.sessionId } }).catch(() => null);
   response.cookies.set(SESSION_COOKIE, '', { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 0 });
 }
 

@@ -18,7 +18,7 @@ export async function register() {
     // Initialize Redis rate limiter if configured
     if (process.env.REDIS_URL) {
       const { initRedisRateLimiter } = await import('@/lib/rate-limiter');
-      initRedisRateLimiter();
+      await initRedisRateLimiter();
       logger.info('Redis rate limiter initialized');
     }
   }
