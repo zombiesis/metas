@@ -107,6 +107,18 @@ export function middleware(request: NextRequest) {
     return new NextResponse('Not found', { status: 404 });
   }
 
+  // Block AI scanners and known hacking tools
+  const ua = (request.headers.get('user-agent') || '').toLowerCase();
+  const blockedUAs = ['sqlmap', 'nikto', 'nmap', 'masscan', 'nuclei', 'dirbuster', 'gobuster', 'wfuzz', 'ffuf', 'burpsuite', 'zap', 'acunetix', 'nessus', 'openvas', 'whatweb', 'wpscan'];
+  if (blockedUAs.some(tool => ua.includes(tool))) {
+    return new NextResponse('', { status: 403 });
+  }
+
+  // Block requests probing for tech stack fingerprints
+  if (pathname === '/_next' || pathname === '/next.config.js' || pathname === '/package.json' || pathname === '/node_modules' || pathname === '/tsconfig.json') {
+    return new NextResponse('Not found', { status: 404 });
+  }
+
   // DDoS: Global rate limit on ALL requests (blocks abusive IPs site-wide)
   if (!checkGlobalRate(ip)) {
     return new NextResponse('Too Many Requests', { status: 429, headers: { 'Retry-After': '60', 'Content-Type': 'text/plain' } });

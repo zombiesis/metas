@@ -12,6 +12,23 @@ export async function GET() {
 Allow: /
 Disallow: /admin/
 Disallow: /api/
+Disallow: /_next/
+Disallow: /student/
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
 
 Sitemap: ${proto}://${host}/sitemap.xml
 `;
