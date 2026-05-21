@@ -67,7 +67,7 @@ describe('CMS API Integration', () => {
     });
 
     it('passes through collections without schemas', () => {
-      const data = { name: 'Test', phone: '123' };
+      const data = { studentName: 'Test', phone: '123' };
       expect(validateInput('admissions', data)).toEqual(data);
     });
   });

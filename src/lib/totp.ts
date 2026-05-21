@@ -23,15 +23,19 @@ export function getTotpUri(secret: string, username: string): string {
   return `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent(ISSUER)}&digits=${TOTP_DIGITS}&period=${TOTP_PERIOD}`;
 }
 
-/** Verify a TOTP token (checks current window ±1) */
-export function verifyTotp(secret: string, token: string): boolean {
-  if (!/^\d{6}$/.test(token)) return false;
+/** Verify a TOTP token (checks current window ±1). Returns the counter if valid, null if invalid. */
+export function verifyTotp(secret: string, token: string, lastCounter?: number | null): { valid: boolean; counter: number | null } {
+  if (!/^\d{6}$/.test(token)) return { valid: false, counter: null };
   const now = Math.floor(Date.now() / 1000);
   for (let offset = -1; offset <= 1; offset++) {
     const counter = Math.floor((now + offset * TOTP_PERIOD) / TOTP_PERIOD);
-    if (generateHotp(secret, counter) === token) return true;
+    if (generateHotp(secret, counter) === token) {
+      // Replay protection: reject if counter already used
+      if (lastCounter != null && counter <= lastCounter) return { valid: false, counter: null };
+      return { valid: true, counter };
+    }
   }
-  return false;
+  return { valid: false, counter: null };
 }
 
 function generateHotp(secret: string, counter: number): string {

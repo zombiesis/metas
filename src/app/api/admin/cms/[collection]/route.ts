@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { assertCollection, readAdminCollection, type CMSCollection } from '@/lib/cms-db';
 import { requireAdminApi, hashPassword, require2faForSensitive, validatePasswordStrength } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
+import { tenantCreateData } from '@/lib/prisma-tenant';
 import { auditLog } from '@/lib/audit';
 import { parseDateInput, slugify, toJson } from '@/lib/utils';
 import { sanitizeRichText } from '@/lib/security';
@@ -61,21 +62,22 @@ function expose(collection: CMSCollection, record: any) {
 
 async function createRecord(collection: CMSCollection, data: any, username: string) {
   const d = stripSystem(data);
+  const branch = d.branchId ? { branchId: d.branchId } : {};
   switch (collection) {
-    case 'pages': return prisma.page.create({ data: { title: str(d.title, 'Untitled page'), slug: slugify(str(d.slug || d.title)), summary: d.summary || null, body: sanitizeRichText(str(d.body)), status: d.status || 'draft', seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, metadata: '{}', createdBy: username, updatedBy: username } });
-    case 'programs': return prisma.program.create({ data: { title: str(d.title, 'Untitled program'), slug: slugify(str(d.slug || d.title)), category: d.category || 'General', status: d.status || 'draft', duration: d.duration || null, eligibility: d.eligibility || null, summary: d.summary || null, overview: sanitizeRichText(str(d.overview)) || null, authorityNote: d.authorityNote || null, admissionProcess: sanitizeRichText(str(d.admissionProcess)) || null, attendanceRules: d.attendanceRules || null, semesterStructure: d.semesterStructure || null, careerOpportunities: d.careerOpportunities || null, rules: toJson(list(d.rules)), documents: toJson(list(d.documents)), faqs: toJson(list(d.faqs)), facultyIds: toJson(list(d.facultyIds)), image: d.image || null, seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, createdBy: username, updatedBy: username } });
-    case 'notices': return prisma.notice.create({ data: { title: str(d.title, 'Untitled notice'), slug: slugify(str(d.slug || d.title)), category: d.category || 'General', date: parseDateInput(d.date), expiryDate: parseDateInput(d.expiryDate), status: d.status || 'active', program: d.program || null, externalUrl: d.url || null, documentUrl: d.documentUrl || null, pinned: Boolean(d.pinned), body: sanitizeRichText(str(d.body)) || null, createdBy: username, updatedBy: username } });
-    case 'documents': return prisma.document.create({ data: { title: str(d.title, 'Untitled document'), slug: slugify(str(d.slug || d.title)), category: d.category || null, authority: d.authority || 'Internal', documentType: d.documentType || 'Document', year: d.year || null, academicYear: d.academicYear || null, program: d.program || null, description: d.description || null, tags: toJson(list(d.tags)), status: d.status || 'current', visibility: d.visibility || 'public', fileUrl: d.file || d.fileUrl || '#', createdBy: username, updatedBy: username } });
-    case 'faculty': return prisma.faculty.create({ data: { name: str(d.name, 'Untitled faculty'), slug: slugify(str(d.slug || d.name)), photo: d.photo || null, designation: d.designation || null, department: d.department || null, qualification: d.qualification || null, experience: d.experience || null, expertise: d.expertise || null, bio: sanitizeRichText(str(d.bio)) || null, publications: toJson(list(d.publications)), contactEmail: d.contactEmail || null, contactPhone: d.contactPhone || null, contactVisible: Boolean(d.contactVisible), spotlight: Boolean(d.spotlight), status: d.status || 'draft', createdBy: username, updatedBy: username } });
-    case 'media': return prisma.mediaAsset.create({ data: { title: str(d.title, 'Untitled media'), fileName: d.fileName || String(d.url || '').split('/').pop() || 'file', url: d.url || '#', mimeType: d.mimeType || null, folder: d.folder || null, altText: d.altText || null, caption: d.caption || null, tags: toJson(list(d.tags)), status: d.status || 'active', createdBy: username, updatedBy: username } });
-    case 'forms': return prisma.formSubmission.create({ data: { kind: d.kind || 'manual', name: d.name || null, phone: d.phone || null, email: d.email || null, program: d.program || null, message: d.message || null, status: d.status || 'new', assignedTo: d.assignedTo || null, notes: d.notes || null, consent: Boolean(d.consent), data: '{}' } });
-    case 'admissions': return prisma.admissionLead.create({ data: { studentName: str(d.studentName, 'Manual lead'), parentName: d.parentName || null, phone: str(d.phone), whatsapp: d.whatsapp || null, email: d.email || null, city: d.city || null, program: d.program || null, qualification: d.qualification || null, message: d.message || null, status: d.status || 'new', assignedTo: d.assignedTo || null, followUpAt: parseDateInput(d.followUpAt), notes: d.notes || null, consent: Boolean(d.consent) } });
-    case 'recruiters': return prisma.recruiterInquiry.create({ data: { company: str(d.company, 'Company'), contactPerson: d.contactPerson || null, designation: d.designation || null, phone: d.phone || null, email: d.email || null, hiringRequirement: d.hiringRequirement || null, programInterest: d.programInterest || null, message: d.message || null, status: d.status || 'new', consent: Boolean(d.consent) } });
-    case 'alumni': return prisma.alumniRegistration.create({ data: { name: str(d.name, 'Alumni'), graduationYear: d.graduationYear || null, program: d.program || null, profession: d.profession || null, company: d.company || null, phone: d.phone || null, email: d.email || null, linkedIn: d.linkedIn || null, message: d.message || null, status: d.status || 'new', consent: Boolean(d.consent) } });
-    case 'contacts': return prisma.contactInquiry.create({ data: { name: str(d.name, 'Contact'), phone: d.phone || null, email: d.email || null, inquiryType: d.inquiryType || 'General', message: d.message || null, status: d.status || 'new', consent: Boolean(d.consent) } });
-    case 'events': return prisma.event.create({ data: { title: str(d.title, 'Untitled event'), slug: slugify(str(d.slug || d.title)), category: d.category || null, summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, startDate: parseDateInput(d.startDate), endDate: parseDateInput(d.endDate), status: d.status || 'draft', image: d.image || null, createdBy: username, updatedBy: username } });
-    case 'blogs': return prisma.blogPost.create({ data: { title: str(d.title, 'Untitled post'), slug: slugify(str(d.slug || d.title)), summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, status: d.status || 'draft', image: d.image || null, publishedAt: parseDateInput(d.publishedAt), seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, createdBy: username, updatedBy: username } });
-    case 'careers': return prisma.jobOpening.create({ data: { title: str(d.title, 'Untitled job'), slug: slugify(str(d.slug || d.title)), department: d.department || null, employmentType: d.employmentType || null, deadline: parseDateInput(d.deadline), status: d.status || 'draft', description: sanitizeRichText(str(d.description)) || null, eligibility: d.eligibility || null, noticeUrl: d.noticeUrl || null, applicationUrl: d.applicationUrl || null, createdBy: username, updatedBy: username } });
+    case 'pages': return prisma.page.create({ data: { ...branch, title: str(d.title, 'Untitled page'), slug: slugify(str(d.slug || d.title)), summary: d.summary || null, body: sanitizeRichText(str(d.body)), status: d.status || 'draft', seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, metadata: '{}', createdBy: username, updatedBy: username } });
+    case 'programs': return prisma.program.create({ data: { ...branch, title: str(d.title, 'Untitled program'), slug: slugify(str(d.slug || d.title)), category: d.category || 'General', status: d.status || 'draft', duration: d.duration || null, eligibility: d.eligibility || null, summary: d.summary || null, overview: sanitizeRichText(str(d.overview)) || null, authorityNote: d.authorityNote || null, admissionProcess: sanitizeRichText(str(d.admissionProcess)) || null, attendanceRules: d.attendanceRules || null, semesterStructure: d.semesterStructure || null, careerOpportunities: d.careerOpportunities || null, rules: toJson(list(d.rules)), documents: toJson(list(d.documents)), faqs: toJson(list(d.faqs)), facultyIds: toJson(list(d.facultyIds)), image: d.image || null, seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, createdBy: username, updatedBy: username } });
+    case 'notices': return prisma.notice.create({ data: { ...branch, title: str(d.title, 'Untitled notice'), slug: slugify(str(d.slug || d.title)), category: d.category || 'General', date: parseDateInput(d.date), expiryDate: parseDateInput(d.expiryDate), status: d.status || 'active', program: d.program || null, externalUrl: d.url || null, documentUrl: d.documentUrl || null, pinned: Boolean(d.pinned), body: sanitizeRichText(str(d.body)) || null, createdBy: username, updatedBy: username } });
+    case 'documents': return prisma.document.create({ data: { ...branch, title: str(d.title, 'Untitled document'), slug: slugify(str(d.slug || d.title)), category: d.category || null, authority: d.authority || 'Internal', documentType: d.documentType || 'Document', year: d.year || null, academicYear: d.academicYear || null, program: d.program || null, description: d.description || null, tags: toJson(list(d.tags)), status: d.status || 'current', visibility: d.visibility || 'public', fileUrl: d.file || d.fileUrl || '#', createdBy: username, updatedBy: username } });
+    case 'faculty': return prisma.faculty.create({ data: { ...branch, name: str(d.name, 'Untitled faculty'), slug: slugify(str(d.slug || d.name)), photo: d.photo || null, designation: d.designation || null, department: d.department || null, qualification: d.qualification || null, experience: d.experience || null, expertise: d.expertise || null, bio: sanitizeRichText(str(d.bio)) || null, publications: toJson(list(d.publications)), contactEmail: d.contactEmail || null, contactPhone: d.contactPhone || null, contactVisible: Boolean(d.contactVisible), spotlight: Boolean(d.spotlight), status: d.status || 'draft', createdBy: username, updatedBy: username } });
+    case 'media': return prisma.mediaAsset.create({ data: { ...branch, title: str(d.title, 'Untitled media'), fileName: d.fileName || String(d.url || '').split('/').pop() || 'file', url: d.url || '#', mimeType: d.mimeType || null, folder: d.folder || null, altText: d.altText || null, caption: d.caption || null, tags: toJson(list(d.tags)), status: d.status || 'active', createdBy: username, updatedBy: username } });
+    case 'forms': return prisma.formSubmission.create({ data: { ...branch, kind: d.kind || 'manual', name: d.name || null, phone: d.phone || null, email: d.email || null, program: d.program || null, message: d.message || null, status: d.status || 'new', assignedTo: d.assignedTo || null, notes: d.notes || null, consent: Boolean(d.consent), data: '{}' } });
+    case 'admissions': return prisma.admissionLead.create({ data: { ...branch, studentName: str(d.studentName, 'Manual lead'), parentName: d.parentName || null, phone: str(d.phone), whatsapp: d.whatsapp || null, email: d.email || null, city: d.city || null, program: d.program || null, qualification: d.qualification || null, message: d.message || null, status: d.status || 'new', assignedTo: d.assignedTo || null, followUpAt: parseDateInput(d.followUpAt), notes: d.notes || null, consent: Boolean(d.consent) } });
+    case 'recruiters': return prisma.recruiterInquiry.create({ data: { ...branch, company: str(d.company, 'Company'), contactPerson: d.contactPerson || null, designation: d.designation || null, phone: d.phone || null, email: d.email || null, hiringRequirement: d.hiringRequirement || null, programInterest: d.programInterest || null, message: d.message || null, status: d.status || 'new', consent: Boolean(d.consent) } });
+    case 'alumni': return prisma.alumniRegistration.create({ data: { ...branch, name: str(d.name, 'Alumni'), graduationYear: d.graduationYear || null, program: d.program || null, profession: d.profession || null, company: d.company || null, phone: d.phone || null, email: d.email || null, linkedIn: d.linkedIn || null, message: d.message || null, status: d.status || 'new', consent: Boolean(d.consent) } });
+    case 'contacts': return prisma.contactInquiry.create({ data: { ...branch, name: str(d.name, 'Contact'), phone: d.phone || null, email: d.email || null, inquiryType: d.inquiryType || 'General', message: d.message || null, status: d.status || 'new', consent: Boolean(d.consent) } });
+    case 'events': return prisma.event.create({ data: { ...branch, title: str(d.title, 'Untitled event'), slug: slugify(str(d.slug || d.title)), category: d.category || null, summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, startDate: parseDateInput(d.startDate), endDate: parseDateInput(d.endDate), status: d.status || 'draft', image: d.image || null, createdBy: username, updatedBy: username } });
+    case 'blogs': return prisma.blogPost.create({ data: { ...branch, title: str(d.title, 'Untitled post'), slug: slugify(str(d.slug || d.title)), summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, status: d.status || 'draft', image: d.image || null, publishedAt: parseDateInput(d.publishedAt), seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, createdBy: username, updatedBy: username } });
+    case 'careers': return prisma.jobOpening.create({ data: { ...branch, title: str(d.title, 'Untitled job'), slug: slugify(str(d.slug || d.title)), department: d.department || null, employmentType: d.employmentType || null, deadline: parseDateInput(d.deadline), status: d.status || 'draft', description: sanitizeRichText(str(d.description)) || null, eligibility: d.eligibility || null, noticeUrl: d.noticeUrl || null, applicationUrl: d.applicationUrl || null, createdBy: username, updatedBy: username } });
     case 'users': {
       const pw = d.password || '';
       const pwCheck = validatePasswordStrength(pw);
@@ -103,7 +105,12 @@ async function updateRecord(collection: CMSCollection, id: string, data: any, us
       const existing = await prisma.page.findUnique({ where: { id } });
       if (existing) {
         const count = await prisma.pageVersion.count({ where: { pageId: id } });
-        await prisma.pageVersion.create({ data: { pageId: id, version: count + 1, snapshot: JSON.stringify(existing), createdBy: username } });
+        await prisma.pageVersion.create({ data: { pageId: id, version: count + 1, snapshot: JSON.stringify(existing), createdBy: username } }).catch(() => {
+          // Retry with max version + 1 on duplicate
+          return prisma.pageVersion.findFirst({ where: { pageId: id }, orderBy: { version: 'desc' } }).then(last =>
+            prisma.pageVersion.create({ data: { pageId: id, version: (last?.version || 0) + 1, snapshot: JSON.stringify(existing), createdBy: username } })
+          );
+        });
       }
       return prisma.page.update({ where: { id }, data: { title: str(d.title, 'Untitled page'), slug: slugify(str(d.slug || d.title)), summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, status: d.status || 'draft', seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, updatedBy: username } });
     }
@@ -165,9 +172,60 @@ async function deleteRecord(collection: CMSCollection, id: string) {
   }
 }
 
+async function paginateCollection(collection: CMSCollection, where: Record<string, unknown>, skip: number, take: number, search?: string): Promise<{ data: any[]; total: number } | null> {
+  // Build search filter based on collection's available fields
+  const titleCollections = ['pages', 'programs', 'notices', 'documents', 'events', 'blogs', 'careers', 'media'];
+  const nameCollections = ['faculty', 'admissions', 'alumni', 'contacts', 'recruiters', 'users'];
+  let searchWhere: Record<string, unknown> = {};
+  if (search) {
+    const or: Record<string, unknown>[] = [];
+    if (titleCollections.includes(collection)) or.push({ title: { contains: search } });
+    if (nameCollections.includes(collection) && collection !== 'admissions' && collection !== 'recruiters') or.push({ name: { contains: search } });
+    if (collection === 'admissions') or.push({ studentName: { contains: search } });
+    if (collection === 'recruiters') or.push({ company: { contains: search } });
+    if (collection === 'users') or.push({ username: { contains: search } });
+    if (or.length) searchWhere = { OR: or };
+  }
+  const w = { ...where, ...searchWhere };
+  try {
+    switch (collection) {
+      case 'pages': { const [data, total] = await Promise.all([prisma.page.findMany({ where: w as any, skip, take, orderBy: { slug: 'asc' } }), prisma.page.count({ where: w as any })]); return { data, total }; }
+      case 'programs': { const [data, total] = await Promise.all([prisma.program.findMany({ where: w as any, skip, take, orderBy: [{ category: 'asc' }, { title: 'asc' }] }), prisma.program.count({ where: w as any })]); return { data, total }; }
+      case 'notices': { const [data, total] = await Promise.all([prisma.notice.findMany({ where: w as any, skip, take, orderBy: [{ pinned: 'desc' }, { date: 'desc' }] }), prisma.notice.count({ where: w as any })]); return { data, total }; }
+      case 'documents': { const [data, total] = await Promise.all([prisma.document.findMany({ where: w as any, skip, take, orderBy: { updatedAt: 'desc' } }), prisma.document.count({ where: w as any })]); return { data, total }; }
+      case 'faculty': { const [data, total] = await Promise.all([prisma.faculty.findMany({ where: w as any, skip, take, orderBy: { name: 'asc' } }), prisma.faculty.count({ where: w as any })]); return { data, total }; }
+      case 'media': { const [data, total] = await Promise.all([prisma.mediaAsset.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.mediaAsset.count({ where: w as any })]); return { data, total }; }
+      case 'events': { const [data, total] = await Promise.all([prisma.event.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.event.count({ where: w as any })]); return { data, total }; }
+      case 'blogs': { const [data, total] = await Promise.all([prisma.blogPost.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.blogPost.count({ where: w as any })]); return { data, total }; }
+      case 'careers': { const [data, total] = await Promise.all([prisma.jobOpening.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.jobOpening.count({ where: w as any })]); return { data, total }; }
+      case 'forms': { const [data, total] = await Promise.all([prisma.formSubmission.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.formSubmission.count({ where: w as any })]); return { data, total }; }
+      case 'admissions': { const [data, total] = await Promise.all([prisma.admissionLead.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.admissionLead.count({ where: w as any })]); return { data, total }; }
+      case 'recruiters': { const [data, total] = await Promise.all([prisma.recruiterInquiry.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.recruiterInquiry.count({ where: w as any })]); return { data, total }; }
+      case 'alumni': { const [data, total] = await Promise.all([prisma.alumniRegistration.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.alumniRegistration.count({ where: w as any })]); return { data, total }; }
+      case 'contacts': { const [data, total] = await Promise.all([prisma.contactInquiry.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.contactInquiry.count({ where: w as any })]); return { data, total }; }
+      case 'users': { const [data, total] = await Promise.all([prisma.user.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' }, include: { role: true } }), prisma.user.count({ where: w as any })]); return { data, total }; }
+      case 'audit-logs': {
+        const branchId = await (await import('@/lib/tenant')).getCurrentBranchId();
+        const userFilter = branchId ? { userId: { in: (await prisma.userBranch.findMany({ where: { branchId }, select: { userId: true } })).map(u => u.userId) } } : {};
+        const [data, total] = await Promise.all([prisma.auditLog.findMany({ where: userFilter, skip, take, orderBy: { createdAt: 'desc' }, include: { user: true } }), prisma.auditLog.count({ where: userFilter })]);
+        return { data, total };
+      }
+      case 'security-events': {
+        const branchId2 = await (await import('@/lib/tenant')).getCurrentBranchId();
+        const userFilter2 = branchId2 ? { userId: { in: (await prisma.userBranch.findMany({ where: { branchId: branchId2 }, select: { userId: true } })).map(u => u.userId) } } : {};
+        const [data, total] = await Promise.all([prisma.securityEvent.findMany({ where: userFilter2, skip, take, orderBy: { createdAt: 'desc' }, include: { user: true } }), prisma.securityEvent.count({ where: userFilter2 })]);
+        return { data, total };
+      }
+      case 'analytics-events': { const [data, total] = await Promise.all([prisma.analyticsEvent.findMany({ skip, take, orderBy: { createdAt: 'desc' } }), prisma.analyticsEvent.count()]); return { data, total }; }
+      default: return null;
+    }
+  } catch { return null; }
+}
+
 export async function GET(request: NextRequest, context: Context) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
+  if (!await can(auth.session!.roleName, 'view')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   try {
     const { collection: collectionParam } = await context.params;
     const collection = assertCollection(collectionParam);
@@ -177,19 +235,44 @@ export async function GET(request: NextRequest, context: Context) {
     const search = url.searchParams.get('search')?.trim() || '';
     const status = url.searchParams.get('status')?.trim() || '';
     const locale = url.searchParams.get('locale')?.trim() || '';
+    const skip = (page - 1) * limit;
 
+    // Build where clause for collections that support filtering
+    const where: Record<string, unknown> = {};
+    if (status) where.status = status;
+    if (locale) where.locale = locale;
+    if (search) where.OR = [
+      { title: { contains: search } },
+      { name: { contains: search } },
+      { slug: { contains: search } },
+    ];
+
+    // Try server-side pagination for supported collections
+    const paginatedCollections = ['pages', 'programs', 'notices', 'documents', 'faculty', 'media', 'events', 'blogs', 'careers', 'forms', 'admissions', 'recruiters', 'alumni', 'contacts', 'users', 'audit-logs', 'security-events', 'analytics-events'];
+
+    if (paginatedCollections.includes(collection)) {
+      const filterWhere: Record<string, unknown> = {};
+      if (status) filterWhere.status = status;
+      if (locale) filterWhere.locale = locale;
+
+      const result = await paginateCollection(collection, filterWhere, skip, limit, search || undefined);
+      if (result) {
+        const records = result.data.map((record: any) => expose(collection, record));
+        const totalPages = Math.ceil(result.total / limit);
+        return NextResponse.json({ ok: true, collection, data: records, meta: { page, limit, total: result.total, totalPages } });
+      }
+    }
+
+    // Fallback: load all and paginate in JS (for search or unsupported collections)
     const allData = await readAdminCollection(collection);
     let records = Array.isArray(allData) ? allData.map((record) => expose(collection, record)) : [];
 
-    // Filter by locale if provided
     if (locale && records.length) {
       records = records.filter((r: any) => r.locale === locale);
     }
-    // Filter by status if provided
     if (status && records.length) {
       records = records.filter((r: any) => r.status === status);
     }
-    // Search across string fields
     if (search && records.length) {
       const q = search.toLowerCase();
       records = records.filter((r: any) => Object.values(r).some((v) => typeof v === 'string' && v.toLowerCase().includes(q)));
@@ -197,7 +280,7 @@ export async function GET(request: NextRequest, context: Context) {
 
     const total = records.length;
     const totalPages = Math.ceil(total / limit);
-    const paginated = records.slice((page - 1) * limit, page * limit);
+    const paginated = records.slice(skip, skip + limit);
 
     return NextResponse.json({ ok: true, collection, data: paginated, meta: { page, limit, total, totalPages } });
   } catch (error) {
@@ -219,7 +302,8 @@ export async function POST(request: NextRequest, context: Context) {
     }
     const { data } = await request.json();
     const validated = validateInput(collection, data || {});
-    const record = await createRecord(collection, validated, auth.session!.username);
+    const tenant = await tenantCreateData();
+    const record = await createRecord(collection, { ...(validated as any), ...tenant }, auth.session!.username);
     await auditLog({ action: 'created_content', entityType: collection, entityId: record?.id, summary: `Created ${collection} record`, userId: auth.session!.userId, afterValue: record, request });
     return NextResponse.json({ ok: true, record: expose(collection, record) });
   } catch (error) {
@@ -241,6 +325,13 @@ export async function PUT(request: NextRequest, context: Context) {
     }
     const { id, data } = await request.json();
     if (!id) return jsonError('Missing record id.');
+    const branchId = await (await import('@/lib/tenant')).getCurrentBranchId();
+    if (branchId && !['users', 'roles'].includes(collection)) {
+      const modelMap: Record<string, string> = { pages: 'page', programs: 'program', notices: 'notice', documents: 'document', faculty: 'faculty', media: 'mediaAsset', events: 'event', blogs: 'blogPost', careers: 'jobOpening', forms: 'formSubmission', admissions: 'admissionLead', recruiters: 'recruiterInquiry', alumni: 'alumniRegistration', contacts: 'contactInquiry' };
+      const model = (prisma as any)[modelMap[collection] || collection];
+      const existing = model ? await model.findUnique({ where: { id }, select: { branchId: true } }).catch(() => null) : null;
+      if (existing && existing.branchId && existing.branchId !== branchId) return NextResponse.json({ ok: false, error: 'Record not found' }, { status: 404 });
+    }
     const validated = validateInput(collection, data || {});
     const record = await updateRecord(collection, id, validated, auth.session!.username);
     await auditLog({ action: 'updated_content', entityType: collection, entityId: id, summary: `Updated ${collection} record`, userId: auth.session!.userId, afterValue: record, request });
@@ -264,6 +355,14 @@ export async function DELETE(request: NextRequest, context: Context) {
     }
     const { id } = await request.json();
     if (!id) return jsonError('Missing record id.');
+    // Verify record belongs to current branch
+    const branchId = await (await import('@/lib/tenant')).getCurrentBranchId();
+    if (branchId && !['users', 'roles'].includes(collection)) {
+      const modelMap: Record<string, string> = { pages: 'page', programs: 'program', notices: 'notice', documents: 'document', faculty: 'faculty', media: 'mediaAsset', events: 'event', blogs: 'blogPost', careers: 'jobOpening', forms: 'formSubmission', admissions: 'admissionLead', recruiters: 'recruiterInquiry', alumni: 'alumniRegistration', contacts: 'contactInquiry' };
+      const model = (prisma as any)[modelMap[collection] || collection];
+      const existing = model ? await model.findUnique({ where: { id }, select: { branchId: true } }).catch(() => null) : null;
+      if (existing && existing.branchId && existing.branchId !== branchId) return NextResponse.json({ ok: false, error: 'Record not found' }, { status: 404 });
+    }
     const record = await deleteRecord(collection, id);
     await auditLog({ action: 'deleted_content', entityType: collection, entityId: id, summary: `Deleted ${collection} record`, userId: auth.session!.userId, beforeValue: record, request });
     return NextResponse.json({ ok: true });

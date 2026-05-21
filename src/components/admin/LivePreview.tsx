@@ -33,7 +33,7 @@ export function LivePreview({ title, body, summary, image, collection }: Props) 
         <h1 className="live-preview-title">{title || 'Untitled'}</h1>
         {summary && <p className="live-preview-summary">{summary}</p>}
         {body ? (
-          <div className="live-preview-body" dangerouslySetInnerHTML={{ __html: body }} />
+          <div className="live-preview-body" dangerouslySetInnerHTML={{ __html: body.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').replace(/<(iframe|object|embed|link|meta|form)\b[^>]*>/gi, '').replace(/\son\w+\s*=\s*["'][^"']*["']/gi, '').replace(/\son\w+\s*=[^\s>]*/gi, '').replace(/javascript\s*:/gi, 'blocked:') }} />
         ) : (
           <p className="live-preview-empty">Start typing to see preview...</p>
         )}

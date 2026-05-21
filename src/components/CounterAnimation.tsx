@@ -9,13 +9,14 @@ export function CounterAnimation({ end, label, suffix = '' }: { end: number; lab
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    let timer: ReturnType<typeof setInterval> | undefined;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && !started.current) {
         started.current = true;
         const duration = 2000;
         const step = Math.ceil(end / (duration / 16));
         let current = 0;
-        const timer = setInterval(() => {
+        timer = setInterval(() => {
           current += step;
           if (current >= end) { current = end; clearInterval(timer); }
           setCount(current);
@@ -23,7 +24,7 @@ export function CounterAnimation({ end, label, suffix = '' }: { end: number; lab
       }
     }, { threshold: 0.3 });
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); if (timer) clearInterval(timer); };
   }, [end]);
 
   return (

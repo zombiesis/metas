@@ -15,6 +15,7 @@ model User {
   passwordHash String
   totpSecret   String?
   totpEnabled  Boolean    @default(false)
+  lastTotpCounter Int?
   recoveryCodes String?
   status       String     @default("active")
   roleId       String?
@@ -27,6 +28,7 @@ model User {
   sessions     Session[]
   auditLogs    AuditLog[]
   securityEvents SecurityEvent[]
+  branches     UserBranch[]
 }
 
 model Role {
@@ -92,7 +94,8 @@ model AuditLog {
 
 model Page {
   id              String        @id @default(cuid())
-  slug            String        @unique
+  branchId        String?
+  slug            String
   locale          String        @default("en")
   title           String
   summary         String?
@@ -110,6 +113,8 @@ model Page {
   versions        PageVersion[]
 
   @@index([status])
+  @@index([branchId])
+  @@unique([slug, branchId])
 }
 
 model PageVersion {
@@ -126,7 +131,8 @@ model PageVersion {
 
 model HomepageSection {
   id        String   @id @default(cuid())
-  key       String   @unique
+  branchId  String?
+  key       String
   title     String?
   subtitle  String?
   body      String?
@@ -138,10 +144,13 @@ model HomepageSection {
   updatedBy String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([key, branchId])
 }
 
 model Program {
   id               String   @id @default(cuid())
+  branchId         String?
   locale           String   @default("en")
   title            String
   slug             String   @unique
@@ -170,10 +179,12 @@ model Program {
   deletedAt        DateTime?
 
   @@index([status, category])
+  @@index([branchId])
 }
 
 model Faculty {
   id              String   @id @default(cuid())
+  branchId        String?
   name            String
   slug            String   @unique
   photo           String?
@@ -197,6 +208,7 @@ model Faculty {
 
 model Notice {
   id          String   @id @default(cuid())
+  branchId    String?
   locale      String   @default("en")
   title       String
   slug        String   @unique
@@ -217,10 +229,12 @@ model Notice {
   deletedAt   DateTime?
 
   @@index([status, pinned, date])
+  @@index([branchId])
 }
 
 model Document {
   id             String   @id @default(cuid())
+  branchId       String?
   title          String
   slug           String   @unique
   category       String?
@@ -247,6 +261,7 @@ model Document {
 
 model MediaAsset {
   id          String   @id @default(cuid())
+  branchId    String?
   title       String
   fileName    String
   url         String   @unique
@@ -266,6 +281,7 @@ model MediaAsset {
 
 model Event {
   id          String   @id @default(cuid())
+  branchId    String?
   title       String
   slug        String   @unique
   category    String?
@@ -285,6 +301,7 @@ model Event {
 
 model BlogPost {
   id          String   @id @default(cuid())
+  branchId    String?
   title       String
   slug        String   @unique
   summary     String?
@@ -302,6 +319,7 @@ model BlogPost {
 
 model JobOpening {
   id          String   @id @default(cuid())
+  branchId    String?
   title       String
   slug        String   @unique
   department  String?
@@ -320,6 +338,7 @@ model JobOpening {
 
 model FormSubmission {
   id          String   @id @default(cuid())
+  branchId    String?
   kind        String
   status      String   @default("new")
   name        String?
@@ -342,6 +361,7 @@ model FormSubmission {
 
 model AdmissionLead {
   id          String   @id @default(cuid())
+  branchId    String?
   studentName String
   parentName  String?
   phone       String
@@ -365,6 +385,7 @@ model AdmissionLead {
 
 model RecruiterInquiry {
   id          String   @id @default(cuid())
+  branchId    String?
   company     String
   contactPerson String?
   designation String?
@@ -381,6 +402,7 @@ model RecruiterInquiry {
 
 model AlumniRegistration {
   id          String   @id @default(cuid())
+  branchId    String?
   name        String
   graduationYear String?
   program     String?
@@ -398,6 +420,7 @@ model AlumniRegistration {
 
 model ContactInquiry {
   id          String   @id @default(cuid())
+  branchId    String?
   name        String
   phone       String?
   email       String?
@@ -411,13 +434,16 @@ model ContactInquiry {
 
 model SiteSetting {
   id          String   @id @default(cuid())
-  key         String   @unique
+  branchId    String?
+  key         String
   value       String
   label       String?
   group       String?
   updatedBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([key, branchId])
 }
 
 model AnalyticsEvent {
@@ -457,4 +483,56 @@ model InstalledPlugin {
   settings    String   @default("{}")
   installedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+
+// ─── Multi-Tenant Models ───────────────────────────────────────────
+
+model Branch {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  domains   BranchDomain[]
+  settings  BranchSettings?
+  users     UserBranch[]
+}
+
+model BranchDomain {
+  id        String  @id @default(cuid())
+  branchId  String
+  branch    Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  domain    String  @unique
+  isPrimary Boolean @default(false)
+
+  @@index([domain])
+}
+
+model BranchSettings {
+  id           String @id @default(cuid())
+  branchId     String @unique
+  branch       Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  logo         String?
+  favicon      String?
+  primaryColor String @default("#071B33")
+  accentColor  String @default("#C7A45B")
+  fontHeading  String @default("Playfair Display")
+  fontBody     String @default("Inter")
+  tagline      String?
+  footerText   String?
+  features     String @default("{}")
+  customCss    String?
+  updatedAt    DateTime @updatedAt
+}
+
+model UserBranch {
+  id       String @id @default(cuid())
+  userId   String
+  branchId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, branchId])
 }

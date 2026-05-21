@@ -77,6 +77,7 @@ CREATE TABLE "AuditLog" (
 CREATE TABLE "Page" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "slug" TEXT NOT NULL,
+    "locale" TEXT NOT NULL DEFAULT 'en',
     "title" TEXT NOT NULL,
     "summary" TEXT,
     "body" TEXT,
@@ -123,6 +124,7 @@ CREATE TABLE "HomepageSection" (
 -- CreateTable
 CREATE TABLE "Program" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "locale" TEXT NOT NULL DEFAULT 'en',
     "title" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "category" TEXT NOT NULL,
@@ -177,6 +179,7 @@ CREATE TABLE "Faculty" (
 -- CreateTable
 CREATE TABLE "Notice" (
     "id" TEXT NOT NULL PRIMARY KEY,
+    "locale" TEXT NOT NULL DEFAULT 'en',
     "title" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "category" TEXT NOT NULL,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { setSessionCookie } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { verifyTotp } from '@/lib/totp';
@@ -18,9 +18,12 @@ function parsePendingToken(cookie: string | undefined): { userId: string } | nul
   if (parts.length !== 4) return null;
   const [userId, expiresStr, nonce, sig] = parts;
   const payload = `${userId}:${expiresStr}:${nonce}`;
-  const secret = process.env.NEXTAUTH_SECRET || process.env.SESSION_SECRET || 'dev-secret-change-me';
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) return null;
   const expected = createHmac('sha256', secret).update(payload).digest('hex');
-  if (sig !== expected) return null;
+  const sigBuf = Buffer.from(sig, 'hex');
+  const expectedBuf = Buffer.from(expected, 'hex');
+  if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) return null;
   if (Date.now() > Number(expiresStr)) return null;
   return { userId };
 }
@@ -50,9 +53,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/login?error=1', request.url), { status: 303 });
   }
 
-  // Try TOTP first
+  // Try TOTP first (with replay protection)
   const decryptedSecret = decrypt(user.totpSecret);
-  let valid = verifyTotp(decryptedSecret, token);
+  const totpResult = verifyTotp(decryptedSecret, token, user.lastTotpCounter);
+  let valid = totpResult.valid;
+
+  // Store counter to prevent replay
+  if (totpResult.valid && totpResult.counter != null) {
+    await prisma.user.update({ where: { id: user.id }, data: { lastTotpCounter: totpResult.counter } }).catch(() => null);
+  }
 
   // If TOTP fails, try recovery code
   if (!valid && user.recoveryCodes) {

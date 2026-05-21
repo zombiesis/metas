@@ -48,10 +48,19 @@ describe('Zod Validation Schemas', () => {
   });
 
   describe('passthrough collections', () => {
-    it('passes through collections without schemas', () => {
-      const data = { anything: 'goes', foo: 123 };
-      expect(validateInput('forms', data)).toEqual(data);
+    it('validates collections that now have schemas', () => {
+      const data = { studentName: 'Test', phone: '123' };
       expect(validateInput('admissions', data)).toEqual(data);
+    });
+
+    it('validates roles collection', () => {
+      const data = { name: 'Editor', description: 'Can edit content' };
+      expect(validateInput('roles', data)).toEqual(data);
+    });
+
+    it('passes through collections without schemas (e.g. homepage-sections)', () => {
+      const data = { anything: 'goes', foo: 123 };
+      expect(validateInput('homepage-sections', data)).toEqual(data);
     });
   });
 });

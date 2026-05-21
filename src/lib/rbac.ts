@@ -21,6 +21,8 @@ export const PERMISSIONS = [
   'archive',
   'export',
   'manage_users',
+  'manage_branches',
+  'switch_branch',
   'view_analytics',
   'view_audit_logs',
   'manage_security'

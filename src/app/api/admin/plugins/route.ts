@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApi } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
+import { can } from '@/lib/rbac';
 import { getAvailablePlugins, getPluginManifest } from '@/lib/plugins';
 import '@/lib/sample-plugins';
 
@@ -34,6 +35,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
+  if (!await can(auth.session!.roleName, 'manage_security')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
 
   const { action, pluginId, settings } = await request.json();
   const manifest = getPluginManifest(pluginId);

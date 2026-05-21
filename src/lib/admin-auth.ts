@@ -12,6 +12,15 @@ const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
 const SESSION_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 const MAX_CONCURRENT_SESSIONS = 3;
 
+// Periodic cleanup of expired sessions (at most once per 10 minutes)
+let lastSessionCleanup = 0;
+async function cleanupExpiredSessions() {
+  const now = Date.now();
+  if (now - lastSessionCleanup < 10 * 60 * 1000) return;
+  lastSessionCleanup = now;
+  await prisma.session.deleteMany({ where: { expiresAt: { lt: new Date() } } }).catch(() => null);
+}
+
 type AdminSession = { userId: string; username: string; roleName: string; sessionId: string; exp: number };
 
 function sha256(value: string) {
@@ -124,6 +133,7 @@ export async function createAdminSession(userId: string, request?: NextRequest) 
 }
 
 export async function verifyAdminSession(token?: string | null): Promise<AdminSession | null> {
+  cleanupExpiredSessions().catch(() => null);
   const parsed = parseCookieToken(token);
   if (!parsed) return null;
   const session = await prisma.session.findUnique({ where: { id: parsed.sessionId }, include: { user: { include: { role: true } } } }).catch(() => null);
@@ -132,7 +142,8 @@ export async function verifyAdminSession(token?: string | null): Promise<AdminSe
 
   // Session fingerprint validation
   if (session.fingerprint) {
-    const reqHeaders = await headers().catch(() => null);
+    let reqHeaders: any = null;
+    try { reqHeaders = await headers(); } catch {}
     if (reqHeaders) {
       const ip = reqHeaders.get('cf-connecting-ip') || reqHeaders.get('x-forwarded-for')?.split(',')[0]?.trim() || reqHeaders.get('x-real-ip') || 'unknown';
       const ua = reqHeaders.get('user-agent') || 'unknown';
@@ -199,16 +210,6 @@ export async function revokeSessions(userId: string, sessionId?: string) {
   } else {
     await prisma.session.deleteMany({ where: { userId } });
   }
-}
-
-export async function canUseDevFallbackLogin(username: string, password: string) {
-  if (process.env.NODE_ENV === 'production') return null;
-  const userCount = await prisma.user.count().catch(() => 1);
-  if (userCount !== 0) return null;
-  const expectedUser = process.env.ADMIN_USERNAME || 'admin';
-  const expectedPassword = process.env.ADMIN_PASSWORD || 'metas-admin-change-me';
-  if (username === expectedUser && password === expectedPassword) return true;
-  return null;
 }
 
 /** Returns a 403 response if the user hasn't enabled 2FA — used to gate sensitive actions */

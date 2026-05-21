@@ -64,12 +64,12 @@ async function seedRolesAndUsers() {
 
 async function seedContent() {
   const site = await readJson<any>('site', {});
-  await prisma.siteSetting.upsert({ where: { key: 'site' }, create: { key: 'site', label: 'Site settings', group: 'global', value: JSON.stringify(site) }, update: { value: JSON.stringify(site) } });
+  await prisma.siteSetting.upsert({ where: { key_branchId: { key: 'site', branchId: '' } }, create: { key: 'site', label: 'Site settings', group: 'global', value: JSON.stringify(site) }, update: { value: JSON.stringify(site) } });
 
   const pages = await readJson<Record<string, any>>('pages', {});
   for (const [slug, page] of Object.entries(pages)) {
     await prisma.page.upsert({
-      where: { slug },
+      where: { slug_branchId: { slug, branchId: '' } },
       create: { slug, title: page.title || page.heroTitle || slug, summary: page.summary || page.welcomeTitle || page.heroSubtitle || '', body: page.body || page.overview || page.welcomeBody || '', status: 'published', seoTitle: page.seoTitle || null, seoDescription: page.seoDescription || null, metadata: JSON.stringify(page) },
       update: { title: page.title || page.heroTitle || slug, summary: page.summary || page.welcomeTitle || page.heroSubtitle || '', body: page.body || page.overview || page.welcomeBody || '', metadata: JSON.stringify(page) }
     });
@@ -96,7 +96,7 @@ async function seedContent() {
     ['footer', 'Premium footer', '', 'Brand, links, programs, contact, map, and copyright only.', 17, {}]
   ] as const;
   for (const [key, title, subtitle, body, order, settings] of sections) {
-    await prisma.homepageSection.upsert({ where: { key }, create: { key, title, subtitle, body, order, visible: true, status: 'published', settings: JSON.stringify(settings) }, update: { title, subtitle, body, order, visible: true, status: 'published', settings: JSON.stringify(settings) } });
+    await prisma.homepageSection.upsert({ where: { key_branchId: { key, branchId: '' } }, create: { key, title, subtitle, body, order, visible: true, status: 'published', settings: JSON.stringify(settings) }, update: { title, subtitle, body, order, visible: true, status: 'published', settings: JSON.stringify(settings) } });
   }
 
   const programs = await readJson<any[]>('programs', []);

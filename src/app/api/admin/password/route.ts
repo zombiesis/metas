@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { requireAdminApi, hashPassword, validatePasswordStrength, revokeSessions } from '@/lib/admin-auth';
+import { requireAdminApi, hashPassword, validatePasswordStrength } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { auditLog } from '@/lib/audit';
 import { logSecurityEvent } from '@/lib/security';
@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
   }
 
   await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(newPassword) } });
-  // Revoke all other sessions for security
-  await revokeSessions(user.id, auth.session!.sessionId);
+  // Revoke all other sessions for security (keep current)
+  await prisma.session.deleteMany({ where: { userId: user.id, id: { not: auth.session!.sessionId } } });
   await auditLog({ action: 'password_changed', entityType: 'User', entityId: user.id, summary: `${auth.session!.username} changed password`, userId: user.id, request });
   await logSecurityEvent({ event: 'password_changed', severity: 'info', summary: `${auth.session!.username} changed password`, userId: user.id, request });
 

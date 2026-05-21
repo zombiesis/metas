@@ -4,6 +4,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApi } from '@/lib/admin-auth';
 import { listUploads } from '@/lib/cms-db';
 import { prisma } from '@/lib/prisma';
+import { tenantCreateData } from '@/lib/prisma-tenant';
+import { getCurrentBranchId } from '@/lib/tenant';
+import { uploadFile } from '@/lib/storage';
 import { auditLog } from '@/lib/audit';
 import { can } from '@/lib/rbac';
 import { allowedUploadExtensions, allowedUploadMimePrefixes, maxUploadBytes, logSecurityEvent } from '@/lib/security';
@@ -19,7 +22,7 @@ function safeName(value: string) {
 }
 
 function allowedMime(mime: string) {
-  if (!mime) return true;
+  if (!mime) return false; // reject missing MIME
   return allowedUploadMimePrefixes.some((prefix) => mime.startsWith(prefix));
 }
 
@@ -33,7 +36,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
-  if (!can(auth.session!.roleName, 'create')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
+  if (!await can(auth.session!.roleName, 'create')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   const form = await request.formData();
   const file = form.get('file');
   const title = String(form.get('title') || '');
@@ -50,13 +53,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: 'File is larger than 15 MB.' }, { status: 400 });
   }
   const year = String(new Date().getFullYear());
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', year, folder);
-  await fs.mkdir(uploadDir, { recursive: true });
+  const branchId = await getCurrentBranchId();
+  const branchSlug = branchId || 'default';
+  const key = `uploads/${branchSlug}/${year}/${folder}/${name}`;
   const bytes = Buffer.from(await file.arrayBuffer());
-  await fs.writeFile(path.join(uploadDir, name), bytes);
-  const url = `/uploads/${year}/${folder}/${name}`;
+  const url = await uploadFile(bytes, key, file.type || 'application/octet-stream');
+  const branch = await tenantCreateData();
   const media = await prisma.mediaAsset.create({
     data: {
+      ...branch,
       title: title || file.name,
       fileName: name,
       url,

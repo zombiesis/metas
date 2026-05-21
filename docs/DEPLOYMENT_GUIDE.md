@@ -13,7 +13,7 @@
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/metas_cms?schema=public"
-ADMIN_SESSION_SECRET="long-random-secret-at-least-32-characters"
+SESSION_SECRET="long-random-secret-at-least-32-characters"
 NEXT_PUBLIC_SITE_URL="https://suratcollege.metasofsda.in"
 TURNSTILE_SECRET_KEY="..."
 FORMS_NOTIFICATION_EMAIL="principalcollege@metasofsda.in"

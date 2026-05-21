@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
     const nonce = randomBytes(16).toString('hex');
     const expires = Date.now() + PENDING_2FA_MAX_AGE * 1000;
     const payload = `${user.id}:${expires}:${nonce}`;
-    const secret = process.env.NEXTAUTH_SECRET || process.env.SESSION_SECRET || 'dev-secret-change-me';
+    const secret = process.env.SESSION_SECRET;
+    if (!secret) return NextResponse.redirect(new URL('/admin/login?error=config', request.url), { status: 303 });
     const sig = createHmac('sha256', secret).update(payload).digest('hex');
     response.cookies.set(PENDING_2FA_COOKIE, `${payload}:${sig}`, {
       httpOnly: true,

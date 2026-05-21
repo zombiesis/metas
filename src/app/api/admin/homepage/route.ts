@@ -18,14 +18,17 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
-  if (!can(auth.session!.roleName, 'edit')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
+  if (!await can(auth.session!.roleName, 'edit')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   const { sections } = await request.json();
   if (!Array.isArray(sections)) return NextResponse.json({ ok: false, error: 'Invalid homepage payload.' }, { status: 400 });
   const before = await getHomepageSections();
+  const branchId = await (await import('@/lib/tenant')).getCurrentBranchId() || null;
+  const branchKey = branchId || '';
   for (const section of sections) {
     await prisma.homepageSection.upsert({
-      where: { key: String(section.key) },
+      where: { key_branchId: { key: String(section.key), branchId: branchKey } },
       create: {
+        branchId: branchKey,
         key: String(section.key),
         title: section.title || null,
         subtitle: section.subtitle || null,

@@ -1,9 +1,14 @@
 import Link from 'next/link';
 import { readCMSCollection, type SiteSettings } from '@/lib/cms-file';
+import { getBranchTheme } from '@/lib/theme';
 import { Navigation } from './MobileNav';
 
 export async function Header() {
-  const site = await readCMSCollection<SiteSettings>('site');
+  const [site, theme] = await Promise.all([
+    readCMSCollection<SiteSettings>('site'),
+    getBranchTheme(),
+  ]);
+  const logoSrc = theme.logo || '/assets/images/logos/metas-college-logo.png';
   return (
     <header className="header">
       <div className="top">
@@ -33,7 +38,7 @@ export async function Header() {
       </div>
       <div className="nav">
         <Link className="brand" href="/">
-          <img src="/assets/images/logos/metas-college-logo.png" alt="Metas Adventist College" />
+          <img src={logoSrc} alt="Metas Adventist College" />
         </Link>
         <Navigation />
         <Link className="btn gold pill nav-cta" href="/admissions/apply">Apply Now</Link>

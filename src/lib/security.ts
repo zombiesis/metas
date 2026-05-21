@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { securityLogger } from '@/lib/logger';
 
-import { getRateLimiter, type RateLimitResult } from '@/lib/rate-limiter';
+import { getRateLimiter, MemoryRateLimiter, type RateLimitResult } from '@/lib/rate-limiter';
 
 export function clientIp(request: NextRequest) {
-  return request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+  if (process.env.TRUST_PROXY === 'cloudflare') {
+    return request.headers.get('cf-connecting-ip') || request.headers.get('x-real-ip') || 'unknown';
+  }
+  return request.headers.get('x-real-ip') || 'unknown';
 }
 
 export function userAgent(request: NextRequest) {
@@ -13,7 +16,12 @@ export function userAgent(request: NextRequest) {
 }
 
 export function rateLimit(key: string, limit: number, windowMs: number): RateLimitResult {
-  return getRateLimiter().check(key, limit, windowMs) as RateLimitResult;
+  const result = getRateLimiter().check(key, limit, windowMs);
+  // If Redis returns a Promise, fall back to memory limiter (not ok:true)
+  if (result && typeof (result as any).then === 'function') {
+    return new MemoryRateLimiter().check(key, limit, windowMs) as RateLimitResult;
+  }
+  return result as RateLimitResult;
 }
 
 export async function logSecurityEvent(args: { event: string; severity?: string; summary?: string; userId?: string; request?: NextRequest; metadata?: unknown }) {

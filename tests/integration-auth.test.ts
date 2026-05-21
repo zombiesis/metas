@@ -19,7 +19,7 @@ describe('Auth + 2FA Integration Flow', () => {
     expect(decrypted).toBe(secret);
 
     // 4. Verify that a wrong token fails
-    expect(verifyTotp(decrypted, '000000')).toBe(false);
+    expect(verifyTotp(decrypted, '000000').valid).toBe(false);
   });
 
   it('recovery codes are unique and properly formatted', () => {

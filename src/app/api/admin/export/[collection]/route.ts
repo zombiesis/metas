@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApi } from '@/lib/admin-auth';
 import { assertCollection, readAdminCollection } from '@/lib/cms-db';
 import { auditLog } from '@/lib/audit';
+import { can } from '@/lib/rbac';
 import { csvEscape } from '@/lib/utils';
 
 export const runtime = 'nodejs';
@@ -12,6 +13,7 @@ type Context = { params: Promise<{ collection: string }> };
 export async function GET(request: NextRequest, context: Context) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
+  if (!await can(auth.session!.roleName, 'export')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   const { collection: raw } = await context.params;
   const collection = assertCollection(raw);
   const rows = await readAdminCollection<any[]>(collection);

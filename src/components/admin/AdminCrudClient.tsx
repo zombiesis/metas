@@ -274,7 +274,7 @@ export function AdminCrudClient({ config, initialRecords }: { config: AdminColle
       <div className="admin-list-panel card">
         <div className="admin-toolbar">
           <div className="search-wrap">
-            <input ref={searchRef} placeholder={`${t('search')} ${config.title.toLowerCase()}...`} value={query} onChange={(event) => setQuery(event.target.value)} />
+            <input ref={searchRef} aria-label="Search" placeholder={`${t('search')} ${config.title.toLowerCase()}...`} value={query} onChange={(event) => setQuery(event.target.value)} />
             {query && <button className="search-clear" type="button" onClick={() => setQuery('')} aria-label="Clear search">×</button>}
           </div>
           <span className="result-count">{filtered.length} of {records.length}</span>

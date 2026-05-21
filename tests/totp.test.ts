@@ -22,17 +22,17 @@ describe('TOTP', () => {
     const secret = generateTotpSecret();
     // We can't easily generate a valid token without reimplementing HOTP,
     // but we can verify that an invalid token is rejected
-    expect(verifyTotp(secret, '000000')).toBe(false);
-    expect(verifyTotp(secret, 'abcdef')).toBe(false);
-    expect(verifyTotp(secret, '')).toBe(false);
-    expect(verifyTotp(secret, '12345')).toBe(false); // too short
+    expect(verifyTotp(secret, '000000').valid).toBe(false);
+    expect(verifyTotp(secret, 'abcdef').valid).toBe(false);
+    expect(verifyTotp(secret, '').valid).toBe(false);
+    expect(verifyTotp(secret, '12345').valid).toBe(false); // too short
   });
 
   it('rejects non-6-digit tokens', () => {
     const secret = generateTotpSecret();
-    expect(verifyTotp(secret, '12345')).toBe(false);
-    expect(verifyTotp(secret, '1234567')).toBe(false);
-    expect(verifyTotp(secret, 'abcdef')).toBe(false);
+    expect(verifyTotp(secret, '12345').valid).toBe(false);
+    expect(verifyTotp(secret, '1234567').valid).toBe(false);
+    expect(verifyTotp(secret, 'abcdef').valid).toBe(false);
   });
 
   it('generates 8 unique recovery codes', () => {

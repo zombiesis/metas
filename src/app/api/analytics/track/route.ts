@@ -12,14 +12,14 @@ export async function POST(request: NextRequest) {
   const data = await request.json().catch(() => ({}));
   await prisma.analyticsEvent.create({
     data: {
-      event: safeString(data.event || 'event'),
-      path: safeString(data.path || ''),
-      label: safeString(data.label || ''),
-      value: safeString(data.value || ''),
-      metadata: JSON.stringify(data.metadata || {}),
-      sessionId: safeString(data.sessionId || ''),
+      event: safeString(data.event || 'event').slice(0, 100),
+      path: safeString(data.path || '').slice(0, 500),
+      label: safeString(data.label || '').slice(0, 200),
+      value: safeString(data.value || '').slice(0, 200),
+      metadata: JSON.stringify(data.metadata || {}).slice(0, 2000),
+      sessionId: safeString(data.sessionId || '').slice(0, 100),
       ipAddress: clientIp(request),
-      userAgent: request.headers.get('user-agent') || undefined
+      userAgent: request.headers.get('user-agent')?.slice(0, 500) || undefined
     }
   }).catch(() => null);
   return NextResponse.json({ ok: true });

@@ -64,7 +64,7 @@ export function CommandPalette() {
   return (
     <div className="cmd-overlay" onClick={() => setOpen(false)}>
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Command palette">
-        <input className="cmd-input" placeholder="Type a command or page name..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown} autoFocus />
+        <input className="cmd-input" aria-label="Command palette" placeholder="Type a command or page name..." value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown} autoFocus />
         <div className="cmd-list">
           {filtered.map((cmd, i) => (
             <button key={cmd.label} className={`cmd-item ${i === selected ? 'cmd-active' : ''}`} onClick={() => execute(cmd)} onMouseEnter={() => setSelected(i)}>

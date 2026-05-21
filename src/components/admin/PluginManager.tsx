@@ -83,7 +83,7 @@ export function PluginManager() {
           ))}
         </div>
         <div className="search-wrap" style={{ flex: 'none', width: 220 }}>
-          <input className="plugin-search" placeholder="Search plugins..." value={search} onChange={(e) => setSearch(e.target.value)} />
+          <input className="plugin-search" aria-label="Search plugins" placeholder="Search plugins..." value={search} onChange={(e) => setSearch(e.target.value)} />
           {search && <button className="search-clear" onClick={() => setSearch('')}>×</button>}
         </div>
       </div>

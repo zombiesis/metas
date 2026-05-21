@@ -34,7 +34,8 @@ export function safeString(value: unknown) {
 }
 
 export function csvEscape(value: unknown) {
-  const text = String(value ?? '');
+  let text = String(value ?? '');
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
   if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
   return text;
 }

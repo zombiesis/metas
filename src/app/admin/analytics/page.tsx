@@ -1,37 +1,61 @@
+import Link from 'next/link';
 import { AdminChrome } from '@/components/admin/AdminChrome';
+import { BarChart } from '@/components/admin/BarChart';
 import { requireAdmin } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
-import { t, getServerLocale } from '@/lib/i18n';
+import { scopedWhere } from '@/lib/prisma-tenant';
 
 export const dynamic = 'force-dynamic';
 
-function countBy<T extends string | null>(values: T[]) {
-  const counts = new Map<string, number>();
-  for (const value of values) counts.set(value || '(unknown)', (counts.get(value || '(unknown)') || 0) + 1);
-  return Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 12);
-}
-
-export default async function AnalyticsAdmin() {
+export default async function AnalyticsPage() {
   const session = await requireAdmin();
-  const locale = await getServerLocale();
-  const events = await prisma.analyticsEvent.findMany({ orderBy: { createdAt: 'desc' }, take: 2000 }).catch(() => []);
-  const submissions = await prisma.formSubmission.count().catch(() => 0);
-  const leads = await prisma.admissionLead.findMany({ orderBy: { createdAt: 'desc' }, take: 1000 }).catch(() => []);
-  const eventCounts = countBy(events.map((event) => event.event));
-  const pageCounts = countBy(events.map((event) => event.path));
-  const programCounts = countBy(leads.map((lead) => lead.program));
+  const w = await scopedWhere();
+
+  const [totalLeads, totalForms, totalContacts, enrolled] = await Promise.all([
+    prisma.admissionLead.count({ where: w }).catch(() => 0),
+    prisma.formSubmission.count({ where: w }).catch(() => 0),
+    prisma.contactInquiry.count({ where: w }).catch(() => 0),
+    prisma.admissionLead.count({ where: { ...w, status: 'enrolled' } }).catch(() => 0),
+  ]);
+
+  const conversionRate = totalLeads ? ((enrolled / totalLeads) * 100).toFixed(1) : '0';
+
+  // Monthly admissions for chart
+  const now = new Date();
+  const monthlyData = await Promise.all(Array.from({ length: 6 }, (_, i) => {
+    const idx = 5 - i;
+    const start = new Date(now.getFullYear(), now.getMonth() - idx, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() - idx + 1, 1);
+    return prisma.admissionLead.count({ where: { ...w, createdAt: { gte: start, lt: end } } }).catch(() => 0)
+      .then(value => ({ label: start.toLocaleDateString('en-IN', { month: 'short' }), value }));
+  }));
+
   return (
-    <AdminChrome title={t('analytics', locale)} description="" user={session}>
-      <div className="admin-metrics">
-        <article className="card metric"><span>Total events</span><strong>{events.length}</strong></article>
-        <article className="card metric"><span>{t('forms', locale)}</span><strong>{submissions}</strong></article>
-        <article className="card metric"><span>{t('admissions', locale)}</span><strong>{leads.length}</strong></article>
-        <article className="card metric"><span>{t('programs', locale)}</span><strong>{programCounts.length}</strong></article>
+    <AdminChrome title="Analytics & Reports" description="Insights and reporting" user={session}>
+      <div className="kpi-grid">
+        <div className="kpi-card"><span className="kpi-value">{totalLeads}</span><span className="kpi-label">Total Leads</span></div>
+        <div className="kpi-card"><span className="kpi-value">{totalForms}</span><span className="kpi-label">Form Submissions</span></div>
+        <div className="kpi-card"><span className="kpi-value">{enrolled}</span><span className="kpi-label">Enrolled</span></div>
+        <div className="kpi-card"><span className="kpi-value">{conversionRate}%</span><span className="kpi-label">Conversion Rate</span></div>
       </div>
-      <div className="grid three">
-        <article className="card"><h2>{t('top_events', locale)}</h2>{eventCounts.length ? <ul>{eventCounts.map(([name, count]) => <li key={name}><b>{name}</b> — {count}</li>)}</ul> : <p>No events yet.</p>}</article>
-        <article className="card"><h2>Top pages</h2>{pageCounts.length ? <ul>{pageCounts.map(([name, count]) => <li key={name}><b>{name}</b> — {count}</li>)}</ul> : <p>No page views yet.</p>}</article>
-        <article className="card"><h2>{t('programs', locale)}</h2>{programCounts.length ? <ul>{programCounts.map(([name, count]) => <li key={name}><b>{name}</b> — {count}</li>)}</ul> : <p>No admissions leads yet.</p>}</article>
+
+      <div className="grid two dash-section">
+        <article className="card">
+          <div className="card-header"><h3>Admissions (6 months)</h3></div>
+          <BarChart data={monthlyData} label="" color="#14b8a6" />
+        </article>
+        <article className="card">
+          <div className="card-header"><h3>Reports</h3></div>
+          <div style={{ display: 'grid', gap: 8 }}>
+            <Link className="btn outline" href="/api/admin/reports?type=admissions_by_month">Admissions by Month (JSON)</Link>
+            <Link className="btn outline" href="/api/admin/reports?type=admissions_by_program">By Program (JSON)</Link>
+            <Link className="btn outline" href="/api/admin/reports?type=forms_by_source">Forms by Source (JSON)</Link>
+            <Link className="btn outline" href="/api/admin/reports/funnel">Admission Funnel (JSON)</Link>
+            <Link className="btn outline" href="/api/admin/reports/pageviews">Page Views (JSON)</Link>
+            <Link className="btn gold" href="/api/admin/reports/pdf?type=admissions" target="_blank">📄 Admissions PDF</Link>
+            <Link className="btn gold" href="/api/admin/reports/pdf?type=forms" target="_blank">📄 Forms PDF</Link>
+          </div>
+        </article>
       </div>
     </AdminChrome>
   );

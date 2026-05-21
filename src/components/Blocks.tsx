@@ -202,7 +202,9 @@ export function ContactCards({ site }: { site: SiteSettings }) {
 
 export function RichContent({ html, fallback }: { html?: string; fallback?: string }) {
   const content = html || fallback || '[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]';
-  return <div className="content" dangerouslySetInnerHTML={{ __html: content }} />;
+  // Strip script tags and event handlers as defense-in-depth (write path already sanitizes)
+  const safe = content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').replace(/\son\w+\s*=/gi, ' data-removed=');
+  return <div className="content" dangerouslySetInnerHTML={{ __html: safe }} />;
 }
 
 export function SourceLinks({ urls }: { urls?: string[] }) {

@@ -1,17 +1,20 @@
 import Link from 'next/link';
 import { readCMSCollection, type Program, type SiteSettings } from '@/lib/cms-file';
+import { getBranchTheme } from '@/lib/theme';
 
 export async function Footer() {
-  const [site, programs] = await Promise.all([
+  const [site, programs, theme] = await Promise.all([
     readCMSCollection<SiteSettings>('site'),
-    readCMSCollection<Program[]>('programs')
+    readCMSCollection<Program[]>('programs'),
+    getBranchTheme(),
   ]);
+  const footerLogo = theme.logo || '/assets/images/logos/metas-college-logo-white.png';
   return (
     <footer className="footer">
       <div className="wrap foot">
         <div>
           <span className="footer-est">★ Est. 1998</span>
-          <img src="/assets/images/logos/metas-college-logo-white.png" alt="Metas Adventist College" />
+          <img src={footerLogo} alt="Metas Adventist College" />
           <p>{site.address}</p>
           <p style={{marginTop: '8px', fontSize: '0.85rem', opacity: 0.6}}>{site.organization}</p>
           <div className="footer-socials">

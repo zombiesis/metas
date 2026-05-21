@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
-  if (!can(auth.session!.roleName, 'edit')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
+  if (!await can(auth.session!.roleName, 'edit')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   const form = await request.formData();
   const versionId = String(form.get('versionId') || '');
   const version = await prisma.pageVersion.findUnique({ where: { id: versionId }, include: { page: true } });

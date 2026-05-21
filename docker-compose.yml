@@ -1,18 +1,23 @@
+version: '3.8'
+
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://metas:metas@db:5432/metas_cms
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-change-this-in-production-32chars}
+      - DATABASE_URL=postgresql://metas:metas@pgbouncer:6432/metas_cms
+      - SESSION_SECRET=${SESSION_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - DEFAULT_BRANCH_ID=${DEFAULT_BRANCH_ID}
       - NODE_ENV=production
     depends_on:
-      db:
-        condition: service_healthy
+      - pgbouncer
     restart: unless-stopped
 
-  db:
+  postgres:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: metas
@@ -20,13 +25,26 @@ services:
       POSTGRES_DB: metas_cms
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U metas"]
       interval: 5s
       timeout: 3s
       retries: 5
+    restart: unless-stopped
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    environment:
+      DATABASE_URL: postgresql://metas:metas@postgres:5432/metas_cms
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 200
+      DEFAULT_POOL_SIZE: 20
+      MIN_POOL_SIZE: 5
+    ports:
+      - "6432:6432"
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

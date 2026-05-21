@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getAllCMSContent } from '@/lib/cms-file';
+import { sanitizeRichText } from '@/lib/security';
 import { HeroSlider } from '@/components/ImageSlider';
 import { CounterAnimation } from '@/components/CounterAnimation';
 import { TabNoticeBoard } from '@/components/TabNoticeBoard';
@@ -61,7 +62,7 @@ export default async function Home() {
             <p className="eyebrow">Welcome to Metas Adventist College</p>
             <h2>{welcome.title || 'A Legacy of Excellence Since 1998'}</h2>
             <div className="about-body">
-              {welcome.body ? <div dangerouslySetInnerHTML={{ __html: welcome.body }} /> : <><p>The Metas Group of Institutions is part of the vast array of Educational and Medical institutions run by the Seventh Day Adventist Organisation. Worldwide they operate <strong>5,590 educational establishments</strong> including 114 universities and colleges. The operations of Surat are managed by Medical Educational Trust Association Surat of Seventh-day Adventist. Metas Adventist Hospital and Metas Adventist School have been in operation since 1923 &amp; 1942 respectively.</p></>}
+              {welcome.body ? <div dangerouslySetInnerHTML={{ __html: sanitizeRichText(welcome.body) }} /> : <><p>The Metas Group of Institutions is part of the vast array of Educational and Medical institutions run by the Seventh Day Adventist Organisation. Worldwide they operate <strong>5,590 educational establishments</strong> including 114 universities and colleges. The operations of Surat are managed by Medical Educational Trust Association Surat of Seventh-day Adventist. Metas Adventist Hospital and Metas Adventist School have been in operation since 1923 &amp; 1942 respectively.</p></>}
             </div>
             <div className="mvv-cards">
               <div className="mvv-card"><h3>Our Mission</h3><p>&ldquo;{site.mission}&rdquo;</p></div>
@@ -72,14 +73,19 @@ export default async function Home() {
           <aside className="inquiry-form-wrap">
             <h3>Inquiry Form</h3>
             <form className="inquiry-form" method="post" action="/api/forms/admissions">
-              <input name="studentName" required placeholder="Full Name" />
-              <input type="email" name="email" placeholder="email@example.com" />
-              <input name="phone" required inputMode="tel" placeholder="+91 98765 43210" />
-              <select name="program" required>
+              <label htmlFor="inq-name">Full Name</label>
+              <input id="inq-name" name="studentName" required placeholder="Full Name" />
+              <label htmlFor="inq-email">Email</label>
+              <input id="inq-email" type="email" name="email" placeholder="email@example.com" />
+              <label htmlFor="inq-phone">Phone</label>
+              <input id="inq-phone" name="phone" required inputMode="tel" placeholder="+91 98765 43210" />
+              <label htmlFor="inq-program">Program</label>
+              <select id="inq-program" name="program" required>
                 <option value="">Select Program</option>
                 <option>MBA</option><option>BBA</option><option>BCA</option><option>B.Sc. Nursing</option><option>GNM</option>
               </select>
-              <textarea name="message" placeholder="Your message (optional)" rows={3} />
+              <label htmlFor="inq-message">Message</label>
+              <textarea id="inq-message" name="message" placeholder="Your message (optional)" rows={3} />
               <input className="honeypot" name="website" aria-hidden="true" tabIndex={-1} />
               <button type="submit" className="btn gold full">Submit Inquiry</button>
             </form>

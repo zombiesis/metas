@@ -27,6 +27,9 @@ function cleanupBuckets() {
   for (const [k, v] of globalBuckets) if (v.reset < now) globalBuckets.delete(k);
   for (const [k, v] of apiBuckets) if (v.reset < now) apiBuckets.delete(k);
   for (const [k, v] of bannedIps) if (v < now) bannedIps.delete(k);
+  // Hard cap to prevent memory exhaustion under DDoS
+  if (globalBuckets.size > 100000) globalBuckets.clear();
+  if (apiBuckets.size > 50000) apiBuckets.clear();
 }
 
 function checkGlobalRate(ip: string): boolean {
@@ -65,7 +68,10 @@ function checkApiRate(ip: string): { ok: boolean; remaining: number; reset: numb
 }
 
 function getIp(request: NextRequest): string {
-  return request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+  if (process.env.TRUST_PROXY === 'cloudflare') {
+    return request.headers.get('cf-connecting-ip') || request.headers.get('x-real-ip') || 'unknown';
+  }
+  return request.headers.get('x-real-ip') || 'unknown';
 }
 
 function isPublicAdminPath(pathname: string) {
@@ -103,6 +109,29 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // Per-tenant rate limit on public form submissions
+  if (pathname.startsWith('/api/forms')) {
+    const host = request.headers.get('host')?.split(':')[0] || 'default';
+    const tenantKey = `tenant:${host}:${ip}`;
+    const bucket = globalBuckets.get(tenantKey);
+    const now = Date.now();
+    if (!bucket || bucket.reset < now) {
+      globalBuckets.set(tenantKey, { count: 1, reset: now + 60_000 });
+    } else {
+      bucket.count++;
+      if (bucket.count > 30) {
+        return new NextResponse('Too Many Requests', { status: 429, headers: { 'Retry-After': '60' } });
+      }
+    }
+  }
+
+  // CSRF: reject cross-origin state-changing requests to admin API (before auth)
+  if (pathname.startsWith('/api/admin') && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
+    if (!originCheck(request)) {
+      return NextResponse.json({ ok: false, error: 'CSRF origin mismatch' }, { status: 403 });
+    }
+  }
+
   // Auth guard: block unauthenticated access to protected admin routes
   if (isAdmin && !isPublicAdminPath(pathname)) {
     const token = request.cookies.get(SESSION_COOKIE)?.value;
@@ -116,14 +145,13 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // CSRF: reject cross-origin state-changing requests to admin API
-  if (pathname.startsWith('/api/admin') && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) {
-    if (!originCheck(request)) {
-      return NextResponse.json({ ok: false, error: 'CSRF origin mismatch' }, { status: 403 });
-    }
-  }
-
   const response = NextResponse.next();
+
+  // Tenant resolution: set branch host header for server-side domain resolution
+  const host = request.headers.get('host')?.split(':')[0] || 'localhost';
+  response.headers.set('x-branch-host', host);
+  // Branch ID resolved server-side via resolveBranchByDomain(host) in tenant.ts
+  // Do NOT trust client cookies for branch selection
 
   // Request ID for tracing
   const requestId = request.headers.get('x-request-id') || crypto.randomUUID();
@@ -134,7 +162,7 @@ export function middleware(request: NextRequest) {
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`,
-    `style-src 'self' 'nonce-${nonce}'`,
+    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
     "connect-src 'self'",
@@ -155,6 +183,10 @@ export function middleware(request: NextRequest) {
   if (isAdmin) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  } else if (pathname.startsWith('/uploads/') || pathname.startsWith('/assets/')) {
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+  } else if (!pathname.startsWith('/api/')) {
+    response.headers.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
   }
   if (apiRateInfo) {
     response.headers.set('X-RateLimit-Remaining', String(apiRateInfo.remaining));
