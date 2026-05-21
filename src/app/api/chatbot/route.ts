@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { rateLimit, clientIp } from '@/lib/security';
 import { resolveBranchByDomain } from '@/lib/tenant';
+import { verifyTurnstile } from '@/lib/turnstile';
 import { headers } from 'next/headers';
 
 export const runtime = 'nodejs';
@@ -15,14 +16,19 @@ export async function POST(request: NextRequest) {
   const limiter = rateLimit(`chatbot:${ip}`, 20, 60000);
   if (!limiter.ok) return NextResponse.json({ ok: false, error: 'Too many messages. Please wait.' }, { status: 429 });
 
-  const { message, history } = await request.json();
+  const { message, history, turnstileToken } = await request.json();
   if (!message || message.length > 500) return NextResponse.json({ ok: false, error: 'Message required (max 500 chars)' }, { status: 400 });
 
-  // Block prompt injection via history — only allow user/assistant roles, cap length
+  // Verify CAPTCHA on first message (when no history)
   const safeHistory = (Array.isArray(history) ? history : [])
     .filter((m: any) => m.role === 'user' || m.role === 'assistant')
     .slice(-4)
     .map((m: any) => ({ role: m.role, content: String(m.content || '').slice(0, 300) }));
+
+  if (safeHistory.length === 0) {
+    const valid = await verifyTurnstile(turnstileToken || '', ip);
+    if (!valid) return NextResponse.json({ ok: false, error: 'Please complete the security check.' }, { status: 403 });
+  }
 
   // Resolve branch for context
   const h = await headers();

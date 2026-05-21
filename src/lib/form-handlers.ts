@@ -8,6 +8,7 @@ import { sendEmail } from '@/lib/email';
 import { getEmailTemplate, renderTemplate, getTemplateVars, wrapInLayout } from '@/lib/email-templates';
 import { calculateSpamScore, isSpam } from '@/lib/spam-scoring';
 import { executeWorkflows } from '@/lib/workflow-engine';
+import { verifyTurnstile } from '@/lib/turnstile';
 
 async function payloadFromRequest(request: NextRequest) {
   const type = request.headers.get('content-type') || '';
@@ -61,6 +62,12 @@ export async function handlePublicForm(kind: 'admissions' | 'contact' | 'recruit
   if (!limiter.ok) return jsonBlocked('Too many form submissions. Please try again later.');
   const data = await payloadFromRequest(request);
   if (data.website) return success(request, 'Thank you.');
+
+  // CAPTCHA verification (Cloudflare Turnstile)
+  const turnstileToken = String(data['cf-turnstile-response'] || data.turnstileToken || '');
+  const turnstileValid = await verifyTurnstile(turnstileToken, clientIp(request));
+  if (!turnstileValid) return fail(request, 'Please complete the security check.');
+
   if (!data.consent && kind !== 'newsletter') return fail(request, 'Consent is required.');
 
   // Spam scoring
