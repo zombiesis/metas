@@ -13,6 +13,7 @@ import { PageTransition } from '@/components/PageTransition';
 import { ScrollAnimations } from '@/components/ScrollAnimations';
 import { CookieConsent } from '@/components/CookieConsent';
 import { ChatbotWidget } from '@/components/ChatbotWidget';
+import { AntiTamper } from '@/components/AntiTamper';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
@@ -61,6 +62,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <CookieConsent />
         <ChatbotWidget />
+        <AntiTamper />
       </body>
     </html>
   );
