@@ -39,12 +39,20 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ ok: true, key: rawKey, prefix, message: 'Save this key — it will not be shown again.' });
 }
 
-/** DELETE: revoke an API key */
+/** DELETE: revoke an API key (branch-scoped — audit-#2 N4) */
 export async function DELETE(request: NextRequest) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
   if (!await can(auth.session!.roleName, 'manage_security')) return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   const { id } = await request.json();
-  await prisma.apiKey.delete({ where: { id } }).catch(() => null);
+  if (!id) return NextResponse.json({ ok: false, error: 'id required' }, { status: 400 });
+  const branchId = await getCurrentBranchId();
+  // deleteMany so the (id, branchId) AND clause is actually enforced — prisma.delete()
+  // would silently drop the branchId guard since only `id` is unique. Super Admins
+  // outside a branch context (no `metas_admin_branch`) still see/delete all keys.
+  const filter: Record<string, unknown> = { id };
+  if (branchId) filter.branchId = branchId;
+  const result = await prisma.apiKey.deleteMany({ where: filter as any });
+  if (result.count === 0) return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
   return NextResponse.json({ ok: true });
 }

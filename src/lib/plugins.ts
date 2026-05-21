@@ -53,6 +53,26 @@ export function getPluginManifest(id: string): PluginManifest | undefined {
 }
 
 // --- Snippet rendering for public pages ---
+
+/**
+ * HTML-escape a string for safe interpolation into plugin templates.
+ *
+ * Audit-#2 N9: previously, `{{trackingId}}` was substituted with raw user
+ * input, so a malicious admin (or compromised plugin settings row) could
+ * inject `</script><script>...</script>` and break out of any wrapping
+ * `<script>` tag. Plugin authors who genuinely need to ship dynamic JS values
+ * must use the JSON form (`{{settings.json.trackingId}}`) rather than
+ * splicing arbitrary strings into HTML.
+ */
+function htmlEscape(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export function renderHeadSnippets(installed: InstalledPlugin[]): string {
   return installed
     .filter((p) => p.enabled)
@@ -78,5 +98,5 @@ export function renderBodySnippets(installed: InstalledPlugin[]): string {
 }
 
 function interpolateSettings(template: string, settings: Record<string, string>): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => settings[key] || '');
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => htmlEscape(String(settings[key] ?? '')));
 }

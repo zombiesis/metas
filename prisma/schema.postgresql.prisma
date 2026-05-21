@@ -73,6 +73,7 @@ model AuditLog {
   id           String   @id @default(cuid())
   userId       String?
   user         User?    @relation(fields: [userId], references: [id])
+  branchId     String?
   action       String
   entityType   String
   entityId     String?
@@ -82,6 +83,8 @@ model AuditLog {
   ipAddress    String?
   userAgent    String?
   createdAt    DateTime @default(now())
+
+  @@index([branchId, createdAt])
 }
 
 model Page {
@@ -155,6 +158,26 @@ model Program {
   updatedBy        String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+/// Value-Added courses are short, supplementary programs (Tally, IELTS, etc.).
+/// Audit-#2 N20: previously JSON-only; promoted to a real model so admin edits
+/// actually reach the public site.
+model ValueAddedCourse {
+  id             String    @id @default(cuid())
+  title          String
+  slug           String    @unique
+  category       String    @default("Value-Added Course")
+  duration       String?
+  eligibility    String?
+  summary        String?
+  image          String?
+  status         String    @default("draft")
+  createdBy      String?
+  updatedBy      String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
 }
 
 model Faculty {
@@ -402,6 +425,7 @@ model SiteSetting {
 
 model AnalyticsEvent {
   id          String   @id @default(cuid())
+  branchId    String?
   event       String
   path        String?
   label       String?
@@ -411,12 +435,15 @@ model AnalyticsEvent {
   ipAddress   String?
   userAgent   String?
   createdAt   DateTime @default(now())
+
+  @@index([branchId, createdAt])
 }
 
 model SecurityEvent {
   id          String   @id @default(cuid())
   userId      String?
   user        User?    @relation(fields: [userId], references: [id])
+  branchId    String?
   event       String
   severity    String   @default("info")
   summary     String?
@@ -424,4 +451,6 @@ model SecurityEvent {
   userAgent   String?
   metadata    String   @default("{}")
   createdAt   DateTime @default(now())
+
+  @@index([branchId, createdAt])
 }

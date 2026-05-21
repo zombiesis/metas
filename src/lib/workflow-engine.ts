@@ -97,6 +97,11 @@ async function executeAction(action: WorkflowAction, data: Record<string, any>) 
     }
     case 'webhook': {
       if (config.url) {
+        // Audit-#2 N8: workflow webhooks must use the same SSRF-safe URL
+        // gate as `notifyWebhook` — otherwise a Branch Admin who can author
+        // workflows can hit `http://169.254.169.254/...` from inside the host.
+        const { isAllowedWebhookUrl } = await import('@/lib/webhooks');
+        if (!(await isAllowedWebhookUrl(config.url))) break;
         await fetch(config.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), signal: AbortSignal.timeout(5000) }).catch(() => null);
       }
       break;

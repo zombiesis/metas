@@ -1,4 +1,4 @@
-import { createHmac, randomBytes } from 'node:crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 
 const TOTP_DIGITS = 6;
 const TOTP_PERIOD = 30;
@@ -29,7 +29,7 @@ export function verifyTotp(secret: string, token: string, lastCounter?: number |
   const now = Math.floor(Date.now() / 1000);
   for (let offset = -1; offset <= 1; offset++) {
     const counter = Math.floor((now + offset * TOTP_PERIOD) / TOTP_PERIOD);
-    if (generateHotp(secret, counter) === token) {
+    if (constantTimeEqual(generateHotp(secret, counter), token)) {
       // Replay protection: reject if counter already used
       if (lastCounter != null && counter <= lastCounter) return { valid: false, counter: null };
       return { valid: true, counter };
@@ -47,6 +47,17 @@ function generateHotp(secret: string, counter: number): string {
   const offset = hmac[hmac.length - 1] & 0x0f;
   const code = ((hmac[offset] & 0x7f) << 24 | hmac[offset + 1] << 16 | hmac[offset + 2] << 8 | hmac[offset + 3]) % 10 ** TOTP_DIGITS;
   return code.toString().padStart(TOTP_DIGITS, '0');
+}
+
+/**
+ * Constant-time string compare for fixed-length, ASCII-only inputs.
+ * Both inputs are 6-digit decimal strings so any length mismatch is itself
+ * a signal of a bad token, but we compare lengths first to keep the
+ * `timingSafeEqual` call from throwing on a mismatch (audit-#2 N16).
+ */
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
 }
 
 const BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';

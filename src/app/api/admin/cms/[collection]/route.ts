@@ -6,8 +6,28 @@ import { tenantCreateData } from '@/lib/prisma-tenant';
 import { auditLog } from '@/lib/audit';
 import { parseDateInput, slugify, toJson } from '@/lib/utils';
 import { sanitizeRichText } from '@/lib/security';
-import { can, invalidateRbacCache } from '@/lib/rbac';
+import { can, invalidateRbacCache, ROLE_NAMES, PERMISSIONS } from '@/lib/rbac';
 import { validateInput } from '@/lib/validation';
+
+/**
+ * Role hierarchy used for privilege-escalation checks. Lower index = higher
+ * privilege (`Super Admin` is index 0). Unknown roles rank at the bottom so a
+ * caller without a known role cannot assign any role at all.
+ */
+function roleRank(name: string | undefined | null): number {
+  const idx = ROLE_NAMES.indexOf(name as (typeof ROLE_NAMES)[number]);
+  return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
+}
+
+/** Throw 403 if `caller` would be granting a role that outranks them. */
+function assertCanAssignRole(callerRole: string, targetRole: string | undefined | null): void {
+  if (!targetRole) return; // no role being assigned
+  if (roleRank(targetRole) < roleRank(callerRole)) {
+    throw new Error(`Cannot assign role "${targetRole}" — it outranks your own role "${callerRole}".`);
+  }
+}
+
+const PERMISSION_ALLOWLIST = new Set<string>(PERMISSIONS as ReadonlyArray<string>);
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -78,16 +98,40 @@ async function createRecord(collection: CMSCollection, data: any, username: stri
     case 'events': return prisma.event.create({ data: { ...branch, title: str(d.title, 'Untitled event'), slug: slugify(str(d.slug || d.title)), category: d.category || null, summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, startDate: parseDateInput(d.startDate), endDate: parseDateInput(d.endDate), status: d.status || 'draft', image: d.image || null, createdBy: username, updatedBy: username } });
     case 'blogs': return prisma.blogPost.create({ data: { ...branch, title: str(d.title, 'Untitled post'), slug: slugify(str(d.slug || d.title)), summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, status: d.status || 'draft', image: d.image || null, publishedAt: parseDateInput(d.publishedAt), seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, createdBy: username, updatedBy: username } });
     case 'careers': return prisma.jobOpening.create({ data: { ...branch, title: str(d.title, 'Untitled job'), slug: slugify(str(d.slug || d.title)), department: d.department || null, employmentType: d.employmentType || null, deadline: parseDateInput(d.deadline), status: d.status || 'draft', description: sanitizeRichText(str(d.description)) || null, eligibility: d.eligibility || null, noticeUrl: d.noticeUrl || null, applicationUrl: d.applicationUrl || null, createdBy: username, updatedBy: username } });
+    case 'value-added-courses': return prisma.valueAddedCourse.create({ data: { ...branch, title: str(d.title, 'Untitled course'), slug: slugify(str(d.slug || d.title)), category: d.category || 'Value-Added Course', duration: d.duration || null, eligibility: d.eligibility || null, summary: sanitizeRichText(str(d.summary)) || null, image: d.image || null, status: d.status || 'draft', createdBy: username, updatedBy: username } });
     case 'users': {
       const pw = d.password || '';
       const pwCheck = validatePasswordStrength(pw);
       if (!pwCheck.ok) throw new Error(`Weak password: ${pwCheck.errors.join(', ')}`);
+      // Caller-rank vs target-rank check is enforced at the route layer (POST handler);
+      // by the time we land here, the role assignment is already authorized.
       const role = d.roleName ? await prisma.role.findUnique({ where: { name: d.roleName } }) : null;
-      return prisma.user.create({ data: { username: str(d.username), email: d.email || null, name: d.name || null, passwordHash: await hashPassword(pw), status: d.status || 'active', roleId: role?.id } });
+      const newUser = await prisma.user.create({
+        data: {
+          username: str(d.username),
+          email: d.email || null,
+          name: d.name || null,
+          passwordHash: await hashPassword(pw),
+          status: d.status || 'active',
+          roleId: role?.id,
+        },
+      });
+      // Auto-bind the new user to the active branch so a Branch Admin who creates
+      // a user doesn't accidentally mint a branch-less account that can switch
+      // anywhere. Super Admins acting in a global context (no branch) skip this.
+      const tenant = await tenantCreateData();
+      if (tenant.branchId) {
+        await prisma.userBranch.create({
+          data: { userId: newUser.id, branchId: tenant.branchId },
+        }).catch(() => null); // ignore if a unique constraint already exists
+      }
+      return newUser;
     }
     case 'roles': {
+      // Constrain permission keys to the canonical PERMISSIONS allowlist (N19).
+      const requestedKeys = list(d.permissionKeys).filter((k: string) => PERMISSION_ALLOWLIST.has(k));
       const role = await prisma.role.create({ data: { name: str(d.name, 'Role'), description: d.description || null } });
-      for (const key of list(d.permissionKeys)) {
+      for (const key of requestedKeys) {
         const permission = await prisma.permission.upsert({ where: { key }, create: { key }, update: {} });
         await prisma.rolePermission.create({ data: { roleId: role.id, permissionId: permission.id } });
       }
@@ -127,6 +171,7 @@ async function updateRecord(collection: CMSCollection, id: string, data: any, us
     case 'events': return prisma.event.update({ where: { id }, data: { title: str(d.title, 'Untitled event'), slug: slugify(str(d.slug || d.title)), category: d.category || null, summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, startDate: parseDateInput(d.startDate), endDate: parseDateInput(d.endDate), status: d.status || 'draft', image: d.image || null, updatedBy: username } });
     case 'blogs': return prisma.blogPost.update({ where: { id }, data: { title: str(d.title, 'Untitled post'), slug: slugify(str(d.slug || d.title)), summary: d.summary || null, body: sanitizeRichText(str(d.body)) || null, status: d.status || 'draft', image: d.image || null, publishedAt: parseDateInput(d.publishedAt), seoTitle: d.seoTitle || null, seoDescription: d.seoDescription || null, updatedBy: username } });
     case 'careers': return prisma.jobOpening.update({ where: { id }, data: { title: str(d.title, 'Untitled job'), slug: slugify(str(d.slug || d.title)), department: d.department || null, employmentType: d.employmentType || null, deadline: parseDateInput(d.deadline), status: d.status || 'draft', description: sanitizeRichText(str(d.description)) || null, eligibility: d.eligibility || null, noticeUrl: d.noticeUrl || null, applicationUrl: d.applicationUrl || null, updatedBy: username } });
+    case 'value-added-courses': return prisma.valueAddedCourse.update({ where: { id }, data: { title: str(d.title, 'Untitled course'), slug: slugify(str(d.slug || d.title)), category: d.category || 'Value-Added Course', duration: d.duration || null, eligibility: d.eligibility || null, summary: sanitizeRichText(str(d.summary)) || null, image: d.image || null, status: d.status || 'draft', updatedBy: username } });
     case 'users': {
       if (d.password) {
         const pwCheck = validatePasswordStrength(d.password);
@@ -136,9 +181,11 @@ async function updateRecord(collection: CMSCollection, id: string, data: any, us
       return prisma.user.update({ where: { id }, data: { username: str(d.username), email: d.email || null, name: d.name || null, status: d.status || 'active', roleId: role?.id, ...(d.password ? { passwordHash: await hashPassword(d.password) } : {}) }, include: { role: true } });
     }
     case 'roles': {
+      // Constrain permission keys to the canonical PERMISSIONS allowlist (N19).
+      const requestedKeys = list(d.permissionKeys).filter((k: string) => PERMISSION_ALLOWLIST.has(k));
       const role = await prisma.role.update({ where: { id }, data: { name: str(d.name, 'Role'), description: d.description || null } });
       await prisma.rolePermission.deleteMany({ where: { roleId: role.id } });
-      for (const key of list(d.permissionKeys)) {
+      for (const key of requestedKeys) {
         const permission = await prisma.permission.upsert({ where: { key }, create: { key }, update: {} });
         await prisma.rolePermission.create({ data: { roleId: role.id, permissionId: permission.id } });
       }
@@ -166,6 +213,7 @@ async function deleteRecord(collection: CMSCollection, id: string) {
     case 'events': return prisma.event.delete({ where: { id } });
     case 'blogs': return prisma.blogPost.delete({ where: { id } });
     case 'careers': return prisma.jobOpening.delete({ where: { id } });
+    case 'value-added-courses': return prisma.valueAddedCourse.update({ where: { id }, data: { deletedAt: new Date() } });
     case 'users': return prisma.user.delete({ where: { id } });
     case 'roles': return prisma.role.delete({ where: { id } });
     default: throw new Error(`Delete is not supported for ${collection}.`);
@@ -198,25 +246,55 @@ async function paginateCollection(collection: CMSCollection, where: Record<strin
       case 'events': { const [data, total] = await Promise.all([prisma.event.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.event.count({ where: w as any })]); return { data, total }; }
       case 'blogs': { const [data, total] = await Promise.all([prisma.blogPost.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.blogPost.count({ where: w as any })]); return { data, total }; }
       case 'careers': { const [data, total] = await Promise.all([prisma.jobOpening.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.jobOpening.count({ where: w as any })]); return { data, total }; }
+      case 'value-added-courses': { const vac = await Promise.all([prisma.valueAddedCourse.findMany({ where: { ...(w as any), deletedAt: null }, skip, take, orderBy: [{ category: 'asc' }, { title: 'asc' }] }), prisma.valueAddedCourse.count({ where: { ...(w as any), deletedAt: null } })]); return { data: vac[0], total: vac[1] }; }
       case 'forms': { const [data, total] = await Promise.all([prisma.formSubmission.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.formSubmission.count({ where: w as any })]); return { data, total }; }
       case 'admissions': { const [data, total] = await Promise.all([prisma.admissionLead.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.admissionLead.count({ where: w as any })]); return { data, total }; }
       case 'recruiters': { const [data, total] = await Promise.all([prisma.recruiterInquiry.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.recruiterInquiry.count({ where: w as any })]); return { data, total }; }
       case 'alumni': { const [data, total] = await Promise.all([prisma.alumniRegistration.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.alumniRegistration.count({ where: w as any })]); return { data, total }; }
       case 'contacts': { const [data, total] = await Promise.all([prisma.contactInquiry.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.contactInquiry.count({ where: w as any })]); return { data, total }; }
-      case 'users': { const [data, total] = await Promise.all([prisma.user.findMany({ where: w as any, skip, take, orderBy: { createdAt: 'desc' }, include: { role: true } }), prisma.user.count({ where: w as any })]); return { data, total }; }
-      case 'audit-logs': {
+      case 'users': {
+        // Branch-scope the user list via the UserBranch join table (N10). A
+        // Branch Editor must not be able to enumerate Super Admin usernames /
+        // emails. Super Admins acting outside any specific branch see all.
         const branchId = await (await import('@/lib/tenant')).getCurrentBranchId();
-        const userFilter = branchId ? { userId: { in: (await prisma.userBranch.findMany({ where: { branchId }, select: { userId: true } })).map(u => u.userId) } } : {};
-        const [data, total] = await Promise.all([prisma.auditLog.findMany({ where: userFilter, skip, take, orderBy: { createdAt: 'desc' }, include: { user: true } }), prisma.auditLog.count({ where: userFilter })]);
+        let userFilter: Record<string, unknown> = w as Record<string, unknown>;
+        if (branchId) {
+          const userIds = (await prisma.userBranch.findMany({ where: { branchId }, select: { userId: true } })).map((u) => u.userId);
+          userFilter = { ...userFilter, id: { in: userIds } };
+        }
+        const [data, total] = await Promise.all([prisma.user.findMany({ where: userFilter as any, skip, take, orderBy: { createdAt: 'desc' }, include: { role: true } }), prisma.user.count({ where: userFilter as any })]);
+        return { data, total };
+      }
+      case 'audit-logs': {
+        // Filter by AuditLog.branchId once the column is populated (N12+N15).
+        // Falls back to userId-via-UserBranch for legacy rows where branchId is null.
+        const branchId = await (await import('@/lib/tenant')).getCurrentBranchId();
+        let logFilter: Record<string, unknown> = {};
+        if (branchId) {
+          const userIds = (await prisma.userBranch.findMany({ where: { branchId }, select: { userId: true } })).map((u) => u.userId);
+          logFilter = { OR: [{ branchId }, { branchId: null, userId: { in: userIds } }] };
+        }
+        const [data, total] = await Promise.all([prisma.auditLog.findMany({ where: logFilter as any, skip, take, orderBy: { createdAt: 'desc' }, include: { user: true } }), prisma.auditLog.count({ where: logFilter as any })]);
         return { data, total };
       }
       case 'security-events': {
         const branchId2 = await (await import('@/lib/tenant')).getCurrentBranchId();
-        const userFilter2 = branchId2 ? { userId: { in: (await prisma.userBranch.findMany({ where: { branchId: branchId2 }, select: { userId: true } })).map(u => u.userId) } } : {};
-        const [data, total] = await Promise.all([prisma.securityEvent.findMany({ where: userFilter2, skip, take, orderBy: { createdAt: 'desc' }, include: { user: true } }), prisma.securityEvent.count({ where: userFilter2 })]);
+        let evFilter: Record<string, unknown> = {};
+        if (branchId2) {
+          const userIds = (await prisma.userBranch.findMany({ where: { branchId: branchId2 }, select: { userId: true } })).map((u) => u.userId);
+          evFilter = { OR: [{ branchId: branchId2 }, { branchId: null, userId: { in: userIds } }] };
+        }
+        const [data, total] = await Promise.all([prisma.securityEvent.findMany({ where: evFilter as any, skip, take, orderBy: { createdAt: 'desc' }, include: { user: true } }), prisma.securityEvent.count({ where: evFilter as any })]);
         return { data, total };
       }
-      case 'analytics-events': { const [data, total] = await Promise.all([prisma.analyticsEvent.findMany({ skip, take, orderBy: { createdAt: 'desc' } }), prisma.analyticsEvent.count()]); return { data, total }; }
+      case 'analytics-events': {
+        // Branch-filter analytics-events (N11). The schema may or may not have
+        // a branchId column on this table; the where clause is a no-op when null.
+        const branchId3 = await (await import('@/lib/tenant')).getCurrentBranchId();
+        const aeFilter: Record<string, unknown> = branchId3 ? { branchId: branchId3 } : {};
+        const [data, total] = await Promise.all([prisma.analyticsEvent.findMany({ where: aeFilter as any, skip, take, orderBy: { createdAt: 'desc' } }), prisma.analyticsEvent.count({ where: aeFilter as any })]);
+        return { data, total };
+      }
       default: return null;
     }
   } catch { return null; }
@@ -248,7 +326,7 @@ export async function GET(request: NextRequest, context: Context) {
     ];
 
     // Try server-side pagination for supported collections
-    const paginatedCollections = ['pages', 'programs', 'notices', 'documents', 'faculty', 'media', 'events', 'blogs', 'careers', 'forms', 'admissions', 'recruiters', 'alumni', 'contacts', 'users', 'audit-logs', 'security-events', 'analytics-events'];
+    const paginatedCollections = ['pages', 'programs', 'notices', 'documents', 'faculty', 'media', 'events', 'blogs', 'careers', 'forms', 'admissions', 'recruiters', 'alumni', 'contacts', 'users', 'audit-logs', 'security-events', 'analytics-events', 'value-added-courses'];
 
     if (paginatedCollections.includes(collection)) {
       const filterWhere: Record<string, unknown> = {};
@@ -300,8 +378,19 @@ export async function POST(request: NextRequest, context: Context) {
       const block = await require2faForSensitive(auth.session!.userId);
       if (block) return block;
     }
+    // Roles can only be authored by Super Admin — anyone with `manage_users`
+    // could otherwise mint a role with an arbitrary permission set and then
+    // assign it to themselves (N1).
+    if (collection === 'roles' && auth.session!.roleName !== 'Super Admin') {
+      return NextResponse.json({ ok: false, error: 'Only Super Admin can create roles' }, { status: 403 });
+    }
     const { data } = await request.json();
-    const validated = validateInput(collection, data || {});
+    const validated = validateInput(collection, data || {}) as Record<string, unknown>;
+    // Privilege-escalation guard: a non-Super-Admin caller must not be able to
+    // assign a role that outranks their own (N1).
+    if (collection === 'users') {
+      assertCanAssignRole(auth.session!.roleName, (validated as { roleName?: string }).roleName);
+    }
     const tenant = await tenantCreateData();
     const record = await createRecord(collection, { ...(validated as any), ...tenant }, auth.session!.username);
     await auditLog({ action: 'created_content', entityType: collection, entityId: record?.id, summary: `Created ${collection} record`, userId: auth.session!.userId, afterValue: record, request });
@@ -323,16 +412,42 @@ export async function PUT(request: NextRequest, context: Context) {
       const block = await require2faForSensitive(auth.session!.userId);
       if (block) return block;
     }
+    if (collection === 'roles' && auth.session!.roleName !== 'Super Admin') {
+      return NextResponse.json({ ok: false, error: 'Only Super Admin can edit roles' }, { status: 403 });
+    }
     const { id, data } = await request.json();
     if (!id) return jsonError('Missing record id.');
     const branchId = await (await import('@/lib/tenant')).getCurrentBranchId();
     if (branchId && !['users', 'roles'].includes(collection)) {
-      const modelMap: Record<string, string> = { pages: 'page', programs: 'program', notices: 'notice', documents: 'document', faculty: 'faculty', media: 'mediaAsset', events: 'event', blogs: 'blogPost', careers: 'jobOpening', forms: 'formSubmission', admissions: 'admissionLead', recruiters: 'recruiterInquiry', alumni: 'alumniRegistration', contacts: 'contactInquiry' };
+      const modelMap: Record<string, string> = { pages: 'page', programs: 'program', notices: 'notice', documents: 'document', faculty: 'faculty', media: 'mediaAsset', events: 'event', blogs: 'blogPost', careers: 'jobOpening', forms: 'formSubmission', admissions: 'admissionLead', recruiters: 'recruiterInquiry', alumni: 'alumniRegistration', contacts: 'contactInquiry', 'value-added-courses': 'valueAddedCourse' };
       const model = (prisma as any)[modelMap[collection] || collection];
       const existing = model ? await model.findUnique({ where: { id }, select: { branchId: true } }).catch(() => null) : null;
-      if (existing && existing.branchId && existing.branchId !== branchId) return NextResponse.json({ ok: false, error: 'Record not found' }, { status: 404 });
+      // Reject mismatched branches AND null-branch (cross-tenant "shared")
+      // records when the caller isn't Super Admin (N18). Without this, any
+      // Branch Admin could edit shared records that show up in every tenant.
+      if (existing) {
+        if (existing.branchId && existing.branchId !== branchId) {
+          return NextResponse.json({ ok: false, error: 'Record not found' }, { status: 404 });
+        }
+        if (!existing.branchId && auth.session!.roleName !== 'Super Admin') {
+          return NextResponse.json({ ok: false, error: 'Only Super Admin can edit shared (cross-tenant) records' }, { status: 403 });
+        }
+      }
     }
-    const validated = validateInput(collection, data || {});
+    const validated = validateInput(collection, data || {}) as Record<string, unknown>;
+    if (collection === 'users') {
+      // Rank check — both for the role being assigned AND for editing a user
+      // who already outranks the caller (e.g., a Principal trying to edit a
+      // Super Admin would be denied here).
+      assertCanAssignRole(auth.session!.roleName, (validated as { roleName?: string }).roleName);
+      const target = await prisma.user.findUnique({ where: { id }, include: { role: true } }).catch(() => null);
+      if (target?.role?.name) {
+        const targetRank = roleRank(target.role.name);
+        if (targetRank < roleRank(auth.session!.roleName)) {
+          return NextResponse.json({ ok: false, error: 'Cannot edit a user who outranks you' }, { status: 403 });
+        }
+      }
+    }
     const record = await updateRecord(collection, id, validated, auth.session!.username);
     await auditLog({ action: 'updated_content', entityType: collection, entityId: id, summary: `Updated ${collection} record`, userId: auth.session!.userId, afterValue: record, request });
     return NextResponse.json({ ok: true, record: expose(collection, record) });
@@ -353,15 +468,35 @@ export async function DELETE(request: NextRequest, context: Context) {
       const block = await require2faForSensitive(auth.session!.userId);
       if (block) return block;
     }
+    if (collection === 'roles' && auth.session!.roleName !== 'Super Admin') {
+      return NextResponse.json({ ok: false, error: 'Only Super Admin can delete roles' }, { status: 403 });
+    }
     const { id } = await request.json();
     if (!id) return jsonError('Missing record id.');
     // Verify record belongs to current branch
     const branchId = await (await import('@/lib/tenant')).getCurrentBranchId();
     if (branchId && !['users', 'roles'].includes(collection)) {
-      const modelMap: Record<string, string> = { pages: 'page', programs: 'program', notices: 'notice', documents: 'document', faculty: 'faculty', media: 'mediaAsset', events: 'event', blogs: 'blogPost', careers: 'jobOpening', forms: 'formSubmission', admissions: 'admissionLead', recruiters: 'recruiterInquiry', alumni: 'alumniRegistration', contacts: 'contactInquiry' };
+      const modelMap: Record<string, string> = { pages: 'page', programs: 'program', notices: 'notice', documents: 'document', faculty: 'faculty', media: 'mediaAsset', events: 'event', blogs: 'blogPost', careers: 'jobOpening', forms: 'formSubmission', admissions: 'admissionLead', recruiters: 'recruiterInquiry', alumni: 'alumniRegistration', contacts: 'contactInquiry', 'value-added-courses': 'valueAddedCourse' };
       const model = (prisma as any)[modelMap[collection] || collection];
       const existing = model ? await model.findUnique({ where: { id }, select: { branchId: true } }).catch(() => null) : null;
-      if (existing && existing.branchId && existing.branchId !== branchId) return NextResponse.json({ ok: false, error: 'Record not found' }, { status: 404 });
+      if (existing) {
+        if (existing.branchId && existing.branchId !== branchId) {
+          return NextResponse.json({ ok: false, error: 'Record not found' }, { status: 404 });
+        }
+        if (!existing.branchId && auth.session!.roleName !== 'Super Admin') {
+          return NextResponse.json({ ok: false, error: 'Only Super Admin can delete shared (cross-tenant) records' }, { status: 403 });
+        }
+      }
+    }
+    if (collection === 'users') {
+      // Prevent self-delete and outranked-user delete (N1).
+      if (id === auth.session!.userId) {
+        return NextResponse.json({ ok: false, error: 'You cannot delete your own account' }, { status: 400 });
+      }
+      const target = await prisma.user.findUnique({ where: { id }, include: { role: true } }).catch(() => null);
+      if (target?.role?.name && roleRank(target.role.name) < roleRank(auth.session!.roleName)) {
+        return NextResponse.json({ ok: false, error: 'Cannot delete a user who outranks you' }, { status: 403 });
+      }
     }
     const record = await deleteRecord(collection, id);
     await auditLog({ action: 'deleted_content', entityType: collection, entityId: id, summary: `Deleted ${collection} record`, userId: auth.session!.userId, beforeValue: record, request });

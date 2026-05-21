@@ -4,6 +4,7 @@ import { securityLogger } from '@/lib/logger';
 
 import { getRateLimiter, MemoryRateLimiter, type RateLimitResult } from '@/lib/rate-limiter';
 import { clientIp as resolveClientIp } from '@/lib/client-ip';
+import { getCurrentBranchId } from '@/lib/tenant';
 
 export function clientIp(request: NextRequest) {
   return resolveClientIp(request);
@@ -24,12 +25,17 @@ export function rateLimit(key: string, limit: number, windowMs: number): RateLim
 
 export async function logSecurityEvent(args: { event: string; severity?: string; summary?: string; userId?: string; request?: NextRequest; metadata?: unknown }) {
   try {
+    // Resolve branchId so multi-tenant security dashboards can filter by an
+    // equality check (N12+N15). Resolution outside an HTTP request fails over to null.
+    let branchId: string | null = null;
+    try { branchId = await getCurrentBranchId(); } catch { branchId = null; }
     await prisma.securityEvent.create({
       data: {
         event: args.event,
         severity: args.severity || 'info',
         summary: args.summary,
         userId: args.userId,
+        branchId: branchId ?? undefined,
         ipAddress: args.request ? clientIp(args.request) : undefined,
         userAgent: args.request ? userAgent(args.request) : undefined,
         metadata: JSON.stringify(args.metadata || {})

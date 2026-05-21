@@ -3,11 +3,19 @@ import { requireAdminApi } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { can } from '@/lib/rbac';
 import { auditLog } from '@/lib/audit';
+import { getCurrentBranchId } from '@/lib/tenant';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-/** POST: GDPR data export or deletion for a specific person */
+/**
+ * POST: GDPR data export or deletion for a specific person.
+ *
+ * The filter is **always** scoped to the active branch (audit-#2 N3). A Super
+ * Admin acting outside any specific branch (no `metas_admin_branch` cookie)
+ * sees every branch — that mode is required so a regulator-level "right to
+ * erasure" request can reach across the whole institution.
+ */
 export async function POST(request: NextRequest) {
   const auth = await requireAdminApi();
   if (auth.response) return auth.response;
@@ -16,9 +24,16 @@ export async function POST(request: NextRequest) {
   const { action, email, phone } = await request.json();
   if (!action || (!email && !phone)) return NextResponse.json({ ok: false, error: 'action and email/phone required' }, { status: 400 });
 
-  const emailFilter = email ? { email } : {};
-  const phoneFilter = phone ? { phone } : {};
-  const filter = { OR: [...(email ? [{ email }] : []), ...(phone ? [{ phone }] : [])] };
+  const branchId = await getCurrentBranchId();
+  // Non-Super-Admin users without an active branch get zero results, never the
+  // global view.
+  if (!branchId && auth.session!.roleName !== 'Super Admin') {
+    return NextResponse.json({ ok: false, error: 'Switch into a branch before issuing a GDPR request' }, { status: 400 });
+  }
+
+  // Identity match on email / phone, intersected with branch.
+  const identityClause = { OR: [...(email ? [{ email: email as string }] : []), ...(phone ? [{ phone: phone as string }] : [])] };
+  const filter = branchId ? { AND: [identityClause, { branchId }] } : identityClause;
 
   if (action === 'export') {
     const [admissions, forms, contacts, alumni, recruiters] = await Promise.all([
@@ -29,8 +44,8 @@ export async function POST(request: NextRequest) {
       prisma.recruiterInquiry.findMany({ where: filter as any }),
     ]);
 
-    await auditLog({ action: 'gdpr_export', entityType: 'GDPR', summary: `Data export for ${email || phone}`, userId: auth.session!.userId, request });
-    return NextResponse.json({ ok: true, data: { admissions, forms, contacts, alumni, recruiters }, recordCount: admissions.length + forms.length + contacts.length + alumni.length + recruiters.length });
+    await auditLog({ action: 'gdpr_export', entityType: 'GDPR', summary: `Data export for ${email || phone}${branchId ? ` (branch ${branchId})` : ' (cross-branch)'}`, userId: auth.session!.userId, request });
+    return NextResponse.json({ ok: true, branchScope: branchId, data: { admissions, forms, contacts, alumni, recruiters }, recordCount: admissions.length + forms.length + contacts.length + alumni.length + recruiters.length });
   }
 
   if (action === 'delete') {
@@ -43,8 +58,8 @@ export async function POST(request: NextRequest) {
     ]);
 
     const total = a.count + f.count + c.count + al.count + r.count;
-    await auditLog({ action: 'gdpr_deletion', entityType: 'GDPR', summary: `Deleted ${total} records for ${email || phone}`, userId: auth.session!.userId, request });
-    return NextResponse.json({ ok: true, deleted: total });
+    await auditLog({ action: 'gdpr_deletion', entityType: 'GDPR', summary: `Deleted ${total} records for ${email || phone}${branchId ? ` (branch ${branchId})` : ' (cross-branch)'}`, userId: auth.session!.userId, request });
+    return NextResponse.json({ ok: true, branchScope: branchId, deleted: total });
   }
 
   return NextResponse.json({ ok: false, error: 'action must be export or delete' }, { status: 400 });
