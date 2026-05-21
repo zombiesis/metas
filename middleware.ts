@@ -192,6 +192,9 @@ export function middleware(request: NextRequest) {
   response.headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
   response.headers.delete('X-Powered-By');
   response.headers.delete('Server');
+  // Fake headers to mislead attackers about tech stack
+  response.headers.set('X-Powered-By', 'PHP/8.3.4');
+  response.headers.set('Server', 'Apache/2.4.58');
   if (process.env.NODE_ENV === 'production') {
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
