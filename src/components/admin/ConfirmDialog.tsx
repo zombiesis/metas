@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type ConfirmOptions = { title?: string; message: string; confirmLabel?: string; danger?: boolean };
 
@@ -15,11 +15,19 @@ export function ConfirmDialog() {
   const [opts, setOpts] = useState<ConfirmOptions>({ message: '' });
   const resolveRef = useRef<(v: boolean) => void>(undefined);
 
-  globalConfirm = useCallback((options: ConfirmOptions) => {
+  const requestConfirm = useCallback((options: ConfirmOptions) => {
     setOpts(options);
     setOpen(true);
     return new Promise<boolean>((resolve) => { resolveRef.current = resolve; });
   }, []);
+
+  // Publish the imperative API outside of render so the component stays pure.
+  useEffect(() => {
+    globalConfirm = requestConfirm;
+    return () => {
+      globalConfirm = () => Promise.resolve(false);
+    };
+  }, [requestConfirm]);
 
   function respond(value: boolean) {
     setOpen(false);

@@ -8,6 +8,7 @@ import { collegeSchema } from '@/lib/schema';
 import { getBranchTheme, themeToCssVars, sanitizeCustomCss } from '@/lib/theme';
 import { getCurrentBranchId } from '@/lib/tenant';
 import { prisma } from '@/lib/prisma';
+import { getCspNonce } from '@/lib/csp-nonce';
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import { PageTransition } from '@/components/PageTransition';
 import { ScrollAnimations } from '@/components/ScrollAnimations';
@@ -37,9 +38,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [site, theme] = await Promise.all([
+  const [site, theme, nonce] = await Promise.all([
     readCMSCollection<SiteSettings>('site'),
     getBranchTheme(),
+    getCspNonce(),
   ]);
   return (
     <html lang="en-IN" className={`${inter.variable} ${playfair.variable}`}>
@@ -59,8 +61,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Footer />
         <AnalyticsTracker />
         <ScrollAnimations />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collegeSchema(site)) }} />
-        <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
+        <script nonce={nonce} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collegeSchema(site)) }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <CookieConsent />
         <ChatbotWidget />
         <AntiTamper />

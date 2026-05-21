@@ -207,14 +207,51 @@ const schemas: Record<string, z.ZodType> = {
     description: z.string().max(200).optional(),
     permissionKeys: z.union([z.array(z.string().max(50)), z.string()]).optional(),
   }),
+  // Previously these three collections bypassed validation entirely. Now they
+  // get a permissive but typed schema — the strictly-required fields are
+  // enforced and free-form HTML body fields are bounded in length so a
+  // malicious editor payload can't blow up the row.
+  'site': z.object({
+    name: z.string().min(1).max(200).optional(),
+    shortName: z.string().max(100).optional(),
+    organization: z.string().max(200).optional(),
+    mission: z.string().max(5000).optional(),
+    vision: z.string().max(5000).optional(),
+    address: z.string().max(500).optional(),
+    hours: z.string().max(200).optional(),
+    phones: z.record(z.string(), z.string().max(40)).optional(),
+    emails: z.record(z.string(), z.string().max(200)).optional(),
+    navigation: z.array(z.tuple([z.string().max(100), z.string().max(200)])).optional(),
+    values: z.array(z.string().max(200)).optional(),
+    infrastructure: z.array(z.string().max(200)).optional(),
+    statPlaceholders: z.array(z.string().max(200)).optional(),
+  }).passthrough(),
+  'homepage-sections': z.object({
+    key: z.string().min(1).max(50),
+    title: z.string().max(200).nullable().optional(),
+    subtitle: z.string().max(500).nullable().optional(),
+    body: z.string().max(50000).nullable().optional(),
+    order: z.number().int().nonnegative().optional(),
+    visible: z.boolean().optional(),
+    status: z.enum(['draft', 'published', 'archived']).optional(),
+    settings: z.record(z.string(), z.unknown()).optional(),
+  }),
+  'value-added-courses': z.object({
+    title: z.string().min(1).max(200),
+    slug: z.string().max(200).optional(),
+    category: z.string().max(100).optional(),
+    duration: z.string().max(100).optional(),
+    eligibility: z.string().max(2000).optional(),
+    summary: z.string().max(2000).optional(),
+    image: z.string().max(500).optional(),
+    status: z.enum(['draft', 'published', 'archived']).optional(),
+  }),
 };
 
 /** Validate input data for a collection. Returns parsed data or throws. */
 export function validateInput(collection: string, data: unknown): unknown {
   const schema = schemas[collection];
   if (!schema) {
-    // Only allow known passthrough collections (site, homepage-sections, value-added-courses)
-    if (['site', 'homepage-sections', 'value-added-courses'].includes(collection)) return data;
     throw new Error(`No validation schema for collection: ${collection}`);
   }
   return schema.parse(data);

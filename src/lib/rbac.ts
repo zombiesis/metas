@@ -46,7 +46,10 @@ async function getPermissionsForRole(roleName: string): Promise<Set<string>> {
   return permissions;
 }
 
-/** Check if a role has a permission — queries DB with 60s cache */
+/**
+ * Async permission check — this is what production route handlers should call.
+ * Hits the DB once per role per 60 seconds and caches the result.
+ */
 export async function can(roleName: string | undefined | null, permission: string): Promise<boolean> {
   if (!roleName) return false;
   if (roleName === 'Super Admin') return true;
@@ -54,12 +57,28 @@ export async function can(roleName: string | undefined | null, permission: strin
   return permissions.has(permission);
 }
 
-/** Synchronous fallback for non-async contexts (uses cache only, returns false on miss) */
+/**
+ * Eagerly fill the in-memory cache for a list of roles. Call this from a place
+ * that already has an await context (admin layouts, request handlers) when you
+ * intend to use `canSync` later in synchronous code paths (e.g., client-component
+ * props that flow through the boundary).
+ */
+export async function preloadPermissions(roleNames: ReadonlyArray<string>): Promise<void> {
+  await Promise.all(roleNames.map((name) => getPermissionsForRole(name)));
+}
+
+/**
+ * Synchronous permission check for the rare contexts that cannot await
+ * (mostly tests). FAIL-CLOSED: returns `false` whenever the role is not yet in
+ * the cache, so a fresh process won't accidentally grant access. If you need
+ * a reliable answer in code that isn't ready to be async, call
+ * `preloadPermissions([role])` first.
+ */
 export function canSync(roleName: string | undefined | null, permission: string): boolean {
   if (!roleName) return false;
   if (roleName === 'Super Admin') return true;
   const cached = cache.get(roleName);
-  if (!cached || cached.expires < Date.now()) return false;
+  if (!cached || cached.expires < Date.now()) return false; // fail-closed on cache miss
   return cached.permissions.has(permission);
 }
 

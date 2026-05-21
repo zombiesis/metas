@@ -5,10 +5,8 @@ export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ slug: string }>;
 
-export async function generateStaticParams() {
-  const courses = await readCMSCollection<ValueAddedCourse[]>('value-added-courses');
-  return courses.map((course) => ({ slug: course.slug }));
-}
+// NOTE: `generateStaticParams` is intentionally NOT exported. This route is
+// force-dynamic and the CMS readers call `headers()` (disallowed at build time).
 
 export default async function ValueAddedDetail({ params }: { params: Params }) {
   const { slug } = await params;

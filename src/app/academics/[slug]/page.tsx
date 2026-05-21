@@ -7,10 +7,10 @@ export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ slug: string }>;
 
-export async function generateStaticParams() {
-  const programs = await readCMSCollection<Program[]>('programs');
-  return programs.map((program) => ({ slug: program.slug }));
-}
+// NOTE: generateStaticParams is intentionally NOT exported here. This route is
+// `force-dynamic` (per-request branch resolution), and the CMS readers call
+// `headers()` via `getCurrentBranchId()` — which Next.js disallows during
+// build-time `generateStaticParams` evaluation.
 
 function matchDocs(program: Program, documents: AccreditationDocument[]) {
   const key = program.title.toLowerCase();
