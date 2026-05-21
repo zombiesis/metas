@@ -563,3 +563,48 @@ model ApiKey {
 
   @@index([branchId])
 }
+
+
+model Workflow {
+  id          String   @id @default(cuid())
+  branchId    String?
+  name        String
+  trigger     String
+  conditions  String   @default("[]")
+  actions     String   @default("[]")
+  enabled     Boolean  @default(true)
+  runCount    Int      @default(0)
+  lastRunAt   DateTime?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([branchId, trigger])
+}
+
+model DripCampaign {
+  id          String   @id @default(cuid())
+  branchId    String?
+  name        String
+  status      String   @default("draft")
+  steps       String   @default("[]")
+  audience    String   @default("{}")
+  enrolledCount Int    @default(0)
+  createdBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CampaignEnrollment {
+  id          String   @id @default(cuid())
+  campaignId  String
+  leadId      String
+  currentStep Int      @default(0)
+  status      String   @default("active")
+  nextRunAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId, status])
+  @@index([nextRunAt])
+}

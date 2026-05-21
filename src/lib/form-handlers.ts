@@ -7,6 +7,7 @@ import { notifyWebhook, WEBHOOK_EVENTS } from '@/lib/webhooks';
 import { sendEmail } from '@/lib/email';
 import { getEmailTemplate, renderTemplate, getTemplateVars, wrapInLayout } from '@/lib/email-templates';
 import { calculateSpamScore, isSpam } from '@/lib/spam-scoring';
+import { executeWorkflows } from '@/lib/workflow-engine';
 
 async function payloadFromRequest(request: NextRequest) {
   const type = request.headers.get('content-type') || '';
@@ -88,6 +89,8 @@ export async function handlePublicForm(kind: 'admissions' | 'contact' | 'recruit
     await prisma.formSubmission.create({ data: { kind, name: studentName, phone, email: safeString(data.email), program: safeString(data.program), message: safeString(data.message), data: JSON.stringify(data), ...submissionCommon } });
     await recordAnalytics('form_submit_admissions', request, data);
     notifyWebhook(WEBHOOK_EVENTS.ADMISSION_LEAD, { kind, name: studentName, email: safeString(data.email), phone }, branch.branchId);
+    // Trigger workflows
+    executeWorkflows('admission_created', { studentName, phone, email: safeString(data.email), program: safeString(data.program), ...data }, branch.branchId).catch(() => null);
     // Auto-reply email to applicant
     const applicantEmail = safeString(data.email);
     if (applicantEmail) {
@@ -122,5 +125,6 @@ export async function handlePublicForm(kind: 'admissions' | 'contact' | 'recruit
   await prisma.formSubmission.create({ data: { kind, name: safeString(data.name || data.contactPerson || data.company), phone: safeString(data.phone), email: safeString(data.email), program: safeString(data.program || data.programInterest), message: safeString(data.message), data: JSON.stringify(data), ...submissionCommon } });
   await recordAnalytics(`form_submit_${kind}`, request, data);
   notifyWebhook(WEBHOOK_EVENTS.FORM_SUBMITTED, { kind, name: safeString(data.name || data.contactPerson || data.company), email: safeString(data.email) }, branch.branchId);
+  executeWorkflows('form_submitted', { kind, ...data }, branch.branchId).catch(() => null);
   return success(request, 'Form submitted successfully.');
 }
