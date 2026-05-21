@@ -97,6 +97,20 @@ export async function verifyAdminCredentials(username: string, password: string,
   if (request) await logLoginGeoAnomaly(user.id, clientIp(request), request);
   await auditLog({ action: 'login', entityType: 'User', entityId: user.id, summary: `${username} signed in`, userId: user.id, request });
   await logSecurityEvent({ event: 'login_success', severity: 'info', summary: `${username} signed in`, userId: user.id, request });
+
+  // Send login notification email
+  const ip = request ? clientIp(request) : 'unknown';
+  const ua = request?.headers.get('user-agent') || 'unknown';
+  const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+  if (user.email) {
+    const { sendEmail } = await import('@/lib/email');
+    sendEmail({
+      to: user.email,
+      subject: `Login Alert: ${username} signed in`,
+      html: `<h3>Login Notification</h3><p>Your account <strong>${username}</strong> was accessed.</p><table><tr><td>Time:</td><td>${time}</td></tr><tr><td>IP:</td><td>${ip}</td></tr><tr><td>Device:</td><td>${ua.slice(0, 100)}</td></tr></table><p>If this wasn't you, change your password immediately and contact the administrator.</p>`,
+    }).catch(() => null);
+  }
+
   return user;
 }
 
