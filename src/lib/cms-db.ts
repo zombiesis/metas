@@ -367,7 +367,8 @@ export async function bumpDocumentDownload(slugOrId: string) {
   try {
     await prisma.document.update({ where: { id: slugOrId }, data: { downloadCount: { increment: 1 } } });
   } catch {
-    try { await prisma.document.update({ where: { slug: slugOrId }, data: { downloadCount: { increment: 1 } } }); } catch {}
+    const doc = await prisma.document.findFirst({ where: { slug: slugOrId } });
+    if (doc) await prisma.document.update({ where: { id: doc.id }, data: { downloadCount: { increment: 1 } } }).catch(() => {});
   }
 }
 

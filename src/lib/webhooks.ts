@@ -6,6 +6,11 @@ type WebhookPayload = {
   branch: string | null;
   data: Record<string, unknown>;
   timestamp: string;
+  // Zapier-compatible flat fields
+  id?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
 };
 
 /** Send webhook notification for form submissions */
@@ -15,7 +20,7 @@ export async function notifyWebhook(event: string, data: Record<string, unknown>
   if (!setting?.value) return;
 
   const urls = setting.value.split('\n').map(u => u.trim()).filter(Boolean);
-  const payload: WebhookPayload = { event, branch: branchId, data, timestamp: new Date().toISOString() };
+  const payload: WebhookPayload = { event, branch: branchId, data, timestamp: new Date().toISOString(), name: String(data.name || ''), email: String(data.email || ''), phone: String(data.phone || '') };
 
   for (const url of urls) {
     if (!isAllowedWebhookUrl(url)) continue;

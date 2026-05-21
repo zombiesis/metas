@@ -102,7 +102,7 @@ async function seedContent() {
   const programs = await readJson<any[]>('programs', []);
   for (const p of programs) {
     await prisma.program.upsert({
-      where: { slug: p.slug },
+      where: { slug_branchId: { slug: p.slug, branchId: '' } },
       create: { title: p.title, slug: p.slug, category: p.category || 'General', status: p.status || 'draft', duration: p.duration || null, eligibility: p.eligibility || null, summary: p.summary || null, overview: p.overview || null, authorityNote: p.authorityNote || null, admissionProcess: p.admissionProcess || null, attendanceRules: p.attendanceRules || null, semesterStructure: p.semesterStructure || null, careerOpportunities: p.careerOpportunities || null, faqs: JSON.stringify(p.faqs || []), rules: JSON.stringify(p.rules || []), documents: JSON.stringify(p.documents || []), facultyIds: JSON.stringify(p.facultyIds || []), image: p.image || null, seoTitle: p.seoTitle || null, seoDescription: p.seoDescription || null },
       update: { title: p.title, category: p.category || 'General', status: p.status || 'draft', duration: p.duration || null, eligibility: p.eligibility || null, summary: p.summary || null, overview: p.overview || null, authorityNote: p.authorityNote || null, admissionProcess: p.admissionProcess || null, attendanceRules: p.attendanceRules || null, semesterStructure: p.semesterStructure || null, careerOpportunities: p.careerOpportunities || null, faqs: JSON.stringify(p.faqs || []), rules: JSON.stringify(p.rules || []), documents: JSON.stringify(p.documents || []), facultyIds: JSON.stringify(p.facultyIds || []), image: p.image || null, seoTitle: p.seoTitle || null, seoDescription: p.seoDescription || null }
     });
@@ -111,7 +111,7 @@ async function seedContent() {
   const faculty = await readJson<any[]>('faculty', []);
   for (const f of faculty) {
     await prisma.faculty.upsert({
-      where: { slug: f.slug || slugify(f.name) },
+      where: { slug_branchId: { slug: f.slug || slugify(f.name), branchId: '' } },
       create: { name: f.name, slug: f.slug || slugify(f.name), department: f.department || null, qualification: f.qualification || null, designation: f.designation || null, photo: f.photo || null, experience: f.experience || null, expertise: f.expertise || null, bio: f.bio || f.verification || null, publications: JSON.stringify(f.publications || []), contactEmail: f.contactEmail || null, contactPhone: f.contactPhone || null, contactVisible: Boolean(f.contactVisible), spotlight: Boolean(f.spotlight), status: f.status || 'published' },
       update: { name: f.name, department: f.department || null, qualification: f.qualification || null, designation: f.designation || null, photo: f.photo || null, experience: f.experience || null, expertise: f.expertise || null, bio: f.bio || f.verification || null, publications: JSON.stringify(f.publications || []), contactEmail: f.contactEmail || null, contactPhone: f.contactPhone || null, contactVisible: Boolean(f.contactVisible), spotlight: Boolean(f.spotlight), status: f.status || 'published' }
     });
@@ -121,7 +121,7 @@ async function seedContent() {
   for (const n of notices) {
     const slug = n.slug || slugify(n.title);
     await prisma.notice.upsert({
-      where: { slug },
+      where: { slug_branchId: { slug, branchId: '' } },
       create: { title: n.title, slug, category: n.category || 'General', date: parseDate(n.date), expiryDate: parseDate(n.expiryDate), status: n.status || 'active', program: n.program || null, externalUrl: n.url || null, documentUrl: n.documentUrl || null, body: n.body || null, pinned: Boolean(n.pinned) },
       update: { title: n.title, category: n.category || 'General', date: parseDate(n.date), expiryDate: parseDate(n.expiryDate), status: n.status || 'active', program: n.program || null, externalUrl: n.url || null, documentUrl: n.documentUrl || null, body: n.body || null, pinned: Boolean(n.pinned) }
     });
@@ -130,7 +130,7 @@ async function seedContent() {
   const documents = await readJson<any[]>('documents', []);
   for (const d of documents) {
     await prisma.document.upsert({
-      where: { slug: d.slug || slugify(d.title) },
+      where: { slug_branchId: { slug: d.slug || slugify(d.title), branchId: '' } },
       create: { title: d.title, slug: d.slug || slugify(d.title), category: d.category || null, authority: d.authority || 'Internal', documentType: d.documentType || 'Document', year: d.year || null, academicYear: d.academicYear || null, program: d.program || null, description: d.description || null, tags: JSON.stringify(d.tags || []), status: d.status || 'current', fileUrl: d.file || d.fileUrl || '#', visibility: d.visibility || 'public' },
       update: { title: d.title, category: d.category || null, authority: d.authority || 'Internal', documentType: d.documentType || 'Document', year: d.year || null, academicYear: d.academicYear || null, program: d.program || null, description: d.description || null, tags: JSON.stringify(d.tags || []), status: d.status || 'current', fileUrl: d.file || d.fileUrl || '#', visibility: d.visibility || 'public' }
     });
@@ -147,7 +147,7 @@ async function seedContent() {
   for (const job of careers) {
     const slug = job.slug || slugify(job.title);
     await prisma.jobOpening.upsert({
-      where: { slug },
+      where: { slug_branchId: { slug, branchId: '' } },
       create: { title: job.title, slug, department: job.department || null, employmentType: job.employmentType || null, deadline: parseDate(job.deadline), status: job.status || 'draft', description: job.description || null, eligibility: job.eligibility || null, noticeUrl: job.noticeUrl || null, applicationUrl: job.applicationUrl || null },
       update: { title: job.title, department: job.department || null, employmentType: job.employmentType || null, deadline: parseDate(job.deadline), status: job.status || 'draft', description: job.description || null, eligibility: job.eligibility || null, noticeUrl: job.noticeUrl || null, applicationUrl: job.applicationUrl || null }
     });
@@ -157,7 +157,7 @@ async function seedContent() {
   for (const event of events) {
     const slug = event.slug || slugify(event.title);
     await prisma.event.upsert({
-      where: { slug },
+      where: { slug_branchId: { slug, branchId: '' } },
       create: { title: event.title, slug, category: event.category || null, summary: event.summary || null, body: event.body || null, startDate: parseDate(event.startDate), endDate: parseDate(event.endDate), status: event.status || 'draft', image: event.image || null },
       update: { title: event.title, category: event.category || null, summary: event.summary || null, body: event.body || null, startDate: parseDate(event.startDate), endDate: parseDate(event.endDate), status: event.status || 'draft', image: event.image || null }
     });
@@ -173,3 +173,4 @@ async function main() {
 }
 
 main().finally(async () => prisma.$disconnect());
+

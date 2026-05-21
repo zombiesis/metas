@@ -11,6 +11,7 @@ import { prisma } from '@/lib/prisma';
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import { PageTransition } from '@/components/PageTransition';
 import { ScrollAnimations } from '@/components/ScrollAnimations';
+import { CookieConsent } from '@/components/CookieConsent';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ScrollAnimations />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collegeSchema(site)) }} />
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
+        <CookieConsent />
       </body>
     </html>
   );

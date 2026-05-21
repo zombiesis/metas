@@ -6,6 +6,7 @@ import { safeString } from '@/lib/utils';
 import { notifyWebhook, WEBHOOK_EVENTS } from '@/lib/webhooks';
 import { sendEmail } from '@/lib/email';
 import { getEmailTemplate, renderTemplate, getTemplateVars, wrapInLayout } from '@/lib/email-templates';
+import { calculateSpamScore, isSpam } from '@/lib/spam-scoring';
 
 async function payloadFromRequest(request: NextRequest) {
   const type = request.headers.get('content-type') || '';
@@ -60,6 +61,10 @@ export async function handlePublicForm(kind: 'admissions' | 'contact' | 'recruit
   const data = await payloadFromRequest(request);
   if (data.website) return success(request, 'Thank you.');
   if (!data.consent && kind !== 'newsletter') return fail(request, 'Consent is required.');
+
+  // Spam scoring
+  const spamResult = calculateSpamScore(data, Date.now() - (Number(data._startTime) || Date.now() - 30000));
+  if (isSpam(spamResult.score)) return success(request, 'Thank you.'); // silently reject spam
 
   const sourcePage = safeString(data.sourcePage || request.headers.get('referer') || '');
   const utmSource = safeString(data.utmSource || data.utm_source || '');

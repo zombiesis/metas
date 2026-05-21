@@ -21,6 +21,16 @@ function track(event: string, payload: Record<string, unknown> = {}) {
 export function AnalyticsTracker() {
   useEffect(() => {
     track('page_view');
+
+    // GA4 integration — only loads if consent granted and GA_MEASUREMENT_ID is set
+    const gaId = (document.querySelector('meta[name="ga-id"]') as HTMLMetaElement)?.content;
+    if (gaId && document.cookie.includes('cookie_consent=all')) {
+      loadGA4(gaId);
+    }
+    // Listen for consent granted event
+    function onConsent() { if (gaId) loadGA4(gaId); }
+    window.addEventListener('consent-granted', onConsent);
+
     function onClick(event: MouseEvent) {
       const target = event.target as HTMLElement | null;
       const link = target?.closest('a') as HTMLAnchorElement | null;
@@ -34,7 +44,19 @@ export function AnalyticsTracker() {
       else if (/apply|admission/i.test(label + href)) track('admission_cta_click', { label, value: href });
     }
     document.addEventListener('click', onClick);
-    return () => document.removeEventListener('click', onClick);
+    return () => { document.removeEventListener('click', onClick); window.removeEventListener('consent-granted', onConsent); };
   }, []);
   return null;
+}
+
+function loadGA4(measurementId: string) {
+  if (document.querySelector(`script[src*="gtag"]`)) return;
+  const script = document.createElement('script');
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  script.async = true;
+  document.head.appendChild(script);
+  (window as any).dataLayer = (window as any).dataLayer || [];
+  function gtag(...args: any[]) { (window as any).dataLayer.push(args); }
+  gtag('js', new Date());
+  gtag('config', measurementId, { anonymize_ip: true });
 }

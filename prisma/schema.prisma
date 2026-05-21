@@ -153,7 +153,7 @@ model Program {
   branchId         String?
   locale           String   @default("en")
   title            String
-  slug             String   @unique
+  slug             String
   category         String
   status           String   @default("draft")
   duration         String?
@@ -180,13 +180,14 @@ model Program {
 
   @@index([status, category])
   @@index([branchId])
+  @@unique([slug, branchId])
 }
 
 model Faculty {
   id              String   @id @default(cuid())
   branchId        String?
   name            String
-  slug            String   @unique
+  slug            String
   photo           String?
   designation     String?
   department      String?
@@ -204,6 +205,8 @@ model Faculty {
   updatedBy       String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@unique([slug, branchId])
 }
 
 model Notice {
@@ -211,7 +214,7 @@ model Notice {
   branchId    String?
   locale      String   @default("en")
   title       String
-  slug        String   @unique
+  slug        String
   category    String
   date        DateTime?
   expiryDate  DateTime?
@@ -230,13 +233,14 @@ model Notice {
 
   @@index([status, pinned, date])
   @@index([branchId])
+  @@unique([slug, branchId])
 }
 
 model Document {
   id             String   @id @default(cuid())
   branchId       String?
   title          String
-  slug           String   @unique
+  slug           String
   category       String?
   authority      String
   documentType   String
@@ -257,6 +261,8 @@ model Document {
   updatedBy      String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  @@unique([slug, branchId])
 }
 
 model MediaAsset {
@@ -283,7 +289,7 @@ model Event {
   id          String   @id @default(cuid())
   branchId    String?
   title       String
-  slug        String   @unique
+  slug        String
   category    String?
   summary     String?
   body        String?
@@ -297,13 +303,15 @@ model Event {
   updatedBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([slug, branchId])
 }
 
 model BlogPost {
   id          String   @id @default(cuid())
   branchId    String?
   title       String
-  slug        String   @unique
+  slug        String
   summary     String?
   body        String?
   status      String   @default("draft")
@@ -315,13 +323,15 @@ model BlogPost {
   updatedBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([slug, branchId])
 }
 
 model JobOpening {
   id          String   @id @default(cuid())
   branchId    String?
   title       String
-  slug        String   @unique
+  slug        String
   department  String?
   employmentType String?
   deadline    DateTime?
@@ -334,6 +344,8 @@ model JobOpening {
   updatedBy   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([slug, branchId])
 }
 
 model FormSubmission {
@@ -535,4 +547,19 @@ model UserBranch {
   branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
   @@unique([userId, branchId])
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  name      String
+  keyHash   String   @unique
+  prefix    String
+  branchId  String?
+  userId    String
+  scopes    String   @default("read")
+  expiresAt DateTime?
+  lastUsedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([branchId])
 }
