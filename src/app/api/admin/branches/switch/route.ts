@@ -2,9 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdminApi } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { can } from '@/lib/rbac';
+import { cookies } from 'next/headers';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+
+/** GET: return the current admin's active branch */
+export async function GET() {
+  const auth = await requireAdminApi();
+  if (auth.response) return auth.response;
+  const store = await cookies();
+  const branchId = store.get('metas_admin_branch')?.value || null;
+  return NextResponse.json({ ok: true, branchId });
+}
 
 /** POST: switch the admin's active branch (stored in session) */
 export async function POST(request: NextRequest) {

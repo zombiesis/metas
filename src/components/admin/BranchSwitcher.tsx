@@ -8,8 +8,12 @@ export function BranchSwitcher() {
   const [current, setCurrent] = useState('');
 
   useEffect(() => {
-    fetch('/api/admin/branches').then(r => r.json()).then(d => {
-      if (d.ok) setBranches(d.branches);
+    Promise.all([
+      fetch('/api/admin/branches').then(r => r.json()),
+      fetch('/api/admin/branches/switch').then(r => r.json()).catch(() => ({ branchId: '' })),
+    ]).then(([branchesData, currentData]) => {
+      if (branchesData.ok) setBranches(branchesData.branches);
+      if (currentData.branchId) setCurrent(currentData.branchId);
     }).catch(() => {});
   }, []);
 
