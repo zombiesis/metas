@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (!secret || !token) return NextResponse.json({ ok: false, error: 'Secret and token required' }, { status: 400 });
-  if (!verifyTotp(secret, token)) return NextResponse.json({ ok: false, error: 'Invalid token. Try again.' }, { status: 400 });
+  if (!verifyTotp(secret, token).valid) return NextResponse.json({ ok: false, error: 'Invalid token. Try again.' }, { status: 400 });
 
   const codes = generateRecoveryCodes();
   await prisma.user.update({ where: { id: auth.session!.userId }, data: { totpSecret: encrypt(secret), totpEnabled: true, recoveryCodes: JSON.stringify(codes) } });

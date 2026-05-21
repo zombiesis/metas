@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import { getCurrentBranchId } from '@/lib/tenant';
 
 type WebhookPayload = {
   event: string;
@@ -14,13 +13,13 @@ type WebhookPayload = {
 };
 
 /** Send webhook notification for form submissions */
-export async function notifyWebhook(event: string, data: Record<string, unknown>) {
-  const branchId = await getCurrentBranchId();
-  const setting = await prisma.siteSetting.findFirst({ where: { key: 'webhook_url', branchId } }).catch(() => null);
+export async function notifyWebhook(event: string, data: Record<string, unknown>, branchId?: string | null) {
+  const bid = branchId ?? null;
+  const setting = await prisma.siteSetting.findFirst({ where: { key: 'webhook_url', branchId: bid || '' } }).catch(() => null);
   if (!setting?.value) return;
 
   const urls = setting.value.split('\n').map(u => u.trim()).filter(Boolean);
-  const payload: WebhookPayload = { event, branch: branchId, data, timestamp: new Date().toISOString(), name: String(data.name || ''), email: String(data.email || ''), phone: String(data.phone || '') };
+  const payload: WebhookPayload = { event, branch: bid, data, timestamp: new Date().toISOString(), name: String(data.name || ''), email: String(data.email || ''), phone: String(data.phone || '') };
 
   for (const url of urls) {
     if (!isAllowedWebhookUrl(url)) continue;

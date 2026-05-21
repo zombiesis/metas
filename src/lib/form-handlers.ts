@@ -87,7 +87,7 @@ export async function handlePublicForm(kind: 'admissions' | 'contact' | 'recruit
     await prisma.admissionLead.create({ data: { studentName, parentName: safeString(data.parentName), phone, whatsapp: safeString(data.whatsapp), email: safeString(data.email), city: safeString(data.city), program: safeString(data.program), qualification: safeString(data.qualification), message: safeString(data.message), duplicateOf: duplicate?.id, ...leadCommon } });
     await prisma.formSubmission.create({ data: { kind, name: studentName, phone, email: safeString(data.email), program: safeString(data.program), message: safeString(data.message), data: JSON.stringify(data), ...submissionCommon } });
     await recordAnalytics('form_submit_admissions', request, data);
-    notifyWebhook(WEBHOOK_EVENTS.ADMISSION_LEAD, { kind, name: studentName, email: safeString(data.email), phone });
+    notifyWebhook(WEBHOOK_EVENTS.ADMISSION_LEAD, { kind, name: studentName, email: safeString(data.email), phone }, branch.branchId);
     // Auto-reply email to applicant
     const applicantEmail = safeString(data.email);
     if (applicantEmail) {
@@ -121,6 +121,6 @@ export async function handlePublicForm(kind: 'admissions' | 'contact' | 'recruit
 
   await prisma.formSubmission.create({ data: { kind, name: safeString(data.name || data.contactPerson || data.company), phone: safeString(data.phone), email: safeString(data.email), program: safeString(data.program || data.programInterest), message: safeString(data.message), data: JSON.stringify(data), ...submissionCommon } });
   await recordAnalytics(`form_submit_${kind}`, request, data);
-  notifyWebhook(WEBHOOK_EVENTS.FORM_SUBMITTED, { kind, name: safeString(data.name || data.contactPerson || data.company), email: safeString(data.email) });
+  notifyWebhook(WEBHOOK_EVENTS.FORM_SUBMITTED, { kind, name: safeString(data.name || data.contactPerson || data.company), email: safeString(data.email) }, branch.branchId);
   return success(request, 'Form submitted successfully.');
 }

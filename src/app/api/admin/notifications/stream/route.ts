@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       controller.enqueue(new TextEncoder().encode(`event: connected\ndata: {"user":"${auth.session!.username}"}\n\n`));
       request.signal.addEventListener('abort', () => { clients.delete(controller); });
     },
-    cancel(controller) { clients.delete(controller); },
+    cancel() { /* cleanup handled by abort listener */ },
   });
 
   return new Response(stream, { headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive' } });
