@@ -3,12 +3,10 @@ import { prisma } from '@/lib/prisma';
 import { securityLogger } from '@/lib/logger';
 
 import { getRateLimiter, MemoryRateLimiter, type RateLimitResult } from '@/lib/rate-limiter';
+import { clientIp as resolveClientIp } from '@/lib/client-ip';
 
 export function clientIp(request: NextRequest) {
-  const trustProxy = process.env.TRUST_PROXY;
-  if (trustProxy === 'cloudflare') return request.headers.get('cf-connecting-ip') || '0.0.0.0';
-  if (trustProxy === 'nginx') return request.headers.get('x-real-ip') || '0.0.0.0';
-  return '0.0.0.0';
+  return resolveClientIp(request);
 }
 
 export function userAgent(request: NextRequest) {

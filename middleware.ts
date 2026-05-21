@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { clientIp } from '@/lib/client-ip';
 
 const SESSION_COOKIE = 'metas_admin_session';
 const PUBLIC_ADMIN_PATHS = ['/admin/login', '/admin/login/verify-2fa', '/api/admin/login', '/api/admin/verify-2fa'];
@@ -13,6 +14,12 @@ const apiBuckets = new Map<string, { count: number; reset: number }>();
 const API_RATE_LIMIT = 60;
 const API_RATE_WINDOW = 60_000;
 
+// Per-(tenant host + IP) rate limit for public form submissions. Kept in its
+// own Map so a flood against the global bucket doesn't evict tenant buckets.
+const tenantBuckets = new Map<string, { count: number; reset: number }>();
+const TENANT_RATE_LIMIT = 30;
+const TENANT_RATE_WINDOW = 60_000;
+
 // --- DDoS Protection: Auto-ban IPs that exceed burst threshold ---
 const bannedIps = new Map<string, number>(); // ip -> ban expiry timestamp
 const BAN_THRESHOLD = 500; // requests in window to trigger ban
@@ -26,10 +33,12 @@ function cleanupBuckets() {
   lastCleanup = now;
   for (const [k, v] of globalBuckets) if (v.reset < now) globalBuckets.delete(k);
   for (const [k, v] of apiBuckets) if (v.reset < now) apiBuckets.delete(k);
+  for (const [k, v] of tenantBuckets) if (v.reset < now) tenantBuckets.delete(k);
   for (const [k, v] of bannedIps) if (v < now) bannedIps.delete(k);
   // Hard cap to prevent memory exhaustion under DDoS
   if (globalBuckets.size > 100000) globalBuckets.clear();
   if (apiBuckets.size > 50000) apiBuckets.clear();
+  if (tenantBuckets.size > 50000) tenantBuckets.clear();
 }
 
 function checkGlobalRate(ip: string): boolean {
@@ -68,12 +77,7 @@ function checkApiRate(ip: string): { ok: boolean; remaining: number; reset: numb
 }
 
 function getIp(request: NextRequest): string {
-  // ONLY trust headers when explicitly configured with a trusted proxy
-  const trustProxy = process.env.TRUST_PROXY;
-  if (trustProxy === 'cloudflare') return request.headers.get('cf-connecting-ip') || '0.0.0.0';
-  if (trustProxy === 'nginx') return request.headers.get('x-real-ip') || '0.0.0.0';
-  // No trusted proxy: use connection IP (unavailable in edge, use fallback)
-  return '0.0.0.0'; // In production, MUST set TRUST_PROXY
+  return clientIp(request);
 }
 
 function isPublicAdminPath(pathname: string) {
@@ -81,14 +85,20 @@ function isPublicAdminPath(pathname: string) {
 }
 
 function originCheck(request: NextRequest): boolean {
-  const origin = request.headers.get('origin');
   const host = request.headers.get('host');
-  if (!origin) return true;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
+  if (!host) return false;
+  const origin = request.headers.get('origin');
+  if (origin) {
+    try { return new URL(origin).host === host; } catch { return false; }
   }
+  // No Origin header — fall back to Referer. If neither is present we treat
+  // the request as cross-origin (rejecting curl/Postman/null-origin clients
+  // for state-changing admin calls is intentional).
+  const referer = request.headers.get('referer');
+  if (referer) {
+    try { return new URL(referer).host === host; } catch { return false; }
+  }
+  return false;
 }
 
 export function middleware(request: NextRequest) {
@@ -134,17 +144,18 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Per-tenant rate limit on public form submissions
+  // Per-tenant rate limit on public form submissions (separate map so a global
+  // DDoS doesn't evict tenant buckets and vice versa).
   if (pathname.startsWith('/api/forms')) {
     const host = request.headers.get('host')?.split(':')[0] || 'default';
-    const tenantKey = `tenant:${host}:${ip}`;
-    const bucket = globalBuckets.get(tenantKey);
+    const tenantKey = `${host}:${ip}`;
+    const bucket = tenantBuckets.get(tenantKey);
     const now = Date.now();
     if (!bucket || bucket.reset < now) {
-      globalBuckets.set(tenantKey, { count: 1, reset: now + 60_000 });
+      tenantBuckets.set(tenantKey, { count: 1, reset: now + TENANT_RATE_WINDOW });
     } else {
       bucket.count++;
-      if (bucket.count > 30) {
+      if (bucket.count > TENANT_RATE_LIMIT) {
         return new NextResponse('Too Many Requests', { status: 429, headers: { 'Retry-After': '60' } });
       }
     }
@@ -170,7 +181,15 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.next();
+  // Generate a fresh CSP nonce for this request and forward it to downstream
+  // route handlers so layout.tsx can attach it to inline <script> tags.
+  // Without this propagation, the inline scripts would be blocked because the
+  // CSP allows scripts only from `'self'` or matching the nonce.
+  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-csp-nonce', nonce);
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
 
   // Tenant resolution: set branch host header for server-side domain resolution
   const host = request.headers.get('host')?.split(':')[0] || 'localhost';
@@ -181,9 +200,11 @@ export function middleware(request: NextRequest) {
   // Request ID for tracing
   const requestId = request.headers.get('x-request-id') || crypto.randomUUID();
   response.headers.set('X-Request-Id', requestId);
+  requestHeaders.set('x-request-id', requestId);
 
-  // Security headers — CSP with nonce for inline scripts
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  // Security headers — CSP with per-request nonce for inline scripts. The
+  // nonce was created at the top of this middleware and pushed onto the
+  // request headers so server components can read it via `getCspNonce()`.
   const csp = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}'`,

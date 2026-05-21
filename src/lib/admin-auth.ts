@@ -6,8 +6,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auditLog } from '@/lib/audit';
 import { clientIp, logSecurityEvent, logLoginGeoAnomaly, rateLimit } from '@/lib/security';
+import { SESSION_COOKIE } from '@/lib/session-constants';
 
-export const SESSION_COOKIE = 'metas_admin_session';
+export { SESSION_COOKIE };
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8;
 const SESSION_IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 const MAX_CONCURRENT_SESSIONS = 3;
@@ -121,27 +122,31 @@ export async function createAdminSession(userId: string, request?: NextRequest) 
   const ua = request?.headers.get('user-agent') || 'unknown';
   const fingerprint = sessionFingerprint(ip, ua);
 
-  const session = await prisma.session.create({
-    data: {
-      userId,
-      tokenHash: sha256(rawToken),
-      expiresAt,
-      ipAddress: ip,
-      userAgent: ua,
-      fingerprint,
+  // Create + prune in a single transaction so two parallel logins can't each
+  // leave the user above MAX_CONCURRENT_SESSIONS or both try to delete the
+  // same now-stale row.
+  const session = await prisma.$transaction(async (tx) => {
+    const created = await tx.session.create({
+      data: {
+        userId,
+        tokenHash: sha256(rawToken),
+        expiresAt,
+        ipAddress: ip,
+        userAgent: ua,
+        fingerprint,
+      },
+    });
+    const allSessions = await tx.session.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true },
+    });
+    if (allSessions.length > MAX_CONCURRENT_SESSIONS) {
+      const toDelete = allSessions.slice(MAX_CONCURRENT_SESSIONS).map((s) => s.id);
+      await tx.session.deleteMany({ where: { id: { in: toDelete }, userId } });
     }
+    return created;
   });
-
-  // Enforce concurrent session limit: delete oldest if over max
-  const allSessions = await prisma.session.findMany({
-    where: { userId },
-    orderBy: { createdAt: 'desc' },
-    select: { id: true }
-  });
-  if (allSessions.length > MAX_CONCURRENT_SESSIONS) {
-    const toDelete = allSessions.slice(MAX_CONCURRENT_SESSIONS).map((s) => s.id);
-    await prisma.session.deleteMany({ where: { id: { in: toDelete } } }).catch(() => null);
-  }
 
   return { cookieValue: `${session.id}.${rawToken}`, expiresAt };
 }
@@ -217,10 +222,13 @@ export async function clearSessionCookie(response: NextResponse) {
   response.cookies.set(SESSION_COOKIE, '', { httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', path: '/', maxAge: 0 });
 }
 
-/** Revoke all sessions for a user, or a specific session */
+/** Revoke all sessions for a user, or a specific session (ownership-checked). */
 export async function revokeSessions(userId: string, sessionId?: string) {
   if (sessionId) {
-    await prisma.session.delete({ where: { id: sessionId, userId } }).catch(() => null);
+    // Use deleteMany so the userId filter is actually enforced. With prisma.delete()
+    // only unique fields (id) are honoured and the userId guard is silently ignored —
+    // letting any caller with a sessionId revoke another user's session.
+    await prisma.session.deleteMany({ where: { id: sessionId, userId } });
   } else {
     await prisma.session.deleteMany({ where: { userId } });
   }

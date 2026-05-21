@@ -47,7 +47,7 @@ describe('Zod Validation Schemas', () => {
     });
   });
 
-  describe('passthrough collections', () => {
+  describe('newly-schema\u2019d collections (formerly passthrough)', () => {
     it('validates collections that now have schemas', () => {
       const data = { studentName: 'Test', phone: '123' };
       expect(validateInput('admissions', data)).toEqual(data);
@@ -58,9 +58,28 @@ describe('Zod Validation Schemas', () => {
       expect(validateInput('roles', data)).toEqual(data);
     });
 
-    it('passes through collections without schemas (e.g. homepage-sections)', () => {
-      const data = { anything: 'goes', foo: 123 };
-      expect(validateInput('homepage-sections', data)).toEqual(data);
+    it('homepage-sections requires a key', () => {
+      // Bug #14: this collection used to bypass validation entirely. Now it
+      // enforces a typed schema — an arbitrary { foo: 123 } payload must fail.
+      expect(() => validateInput('homepage-sections', { foo: 123 })).toThrow();
+      const valid = { key: 'hero', title: 'Welcome', order: 1, visible: true, status: 'published' as const };
+      expect(validateInput('homepage-sections', valid)).toMatchObject({ key: 'hero', title: 'Welcome' });
+    });
+
+    it('site collection allows extra keys via passthrough but enforces shape', () => {
+      const valid = { name: 'Metas', mission: 'Excellence', extraFutureField: 'ok' };
+      expect(validateInput('site', valid)).toMatchObject({ name: 'Metas' });
+      expect(() => validateInput('site', { name: 123 })).toThrow();
+    });
+
+    it('value-added-courses requires a title', () => {
+      expect(() => validateInput('value-added-courses', { duration: '6 weeks' })).toThrow();
+      const valid = { title: 'Sign Language', duration: '6 weeks' };
+      expect(validateInput('value-added-courses', valid)).toMatchObject({ title: 'Sign Language' });
+    });
+
+    it('rejects entirely unknown collections', () => {
+      expect(() => validateInput('not-a-collection', { foo: 'bar' })).toThrow();
     });
   });
 });
