@@ -1,4 +1,9 @@
 {
   "buildCommand": "prisma generate && next build",
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "build": {
+    "env": {
+      "DATABASE_URL": "file:./placeholder.db"
+    }
+  }
 }

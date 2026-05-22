@@ -2,12 +2,13 @@ import Link from 'next/link';
 import { AdminChrome } from '@/components/admin/AdminChrome';
 import { BarChart } from '@/components/admin/BarChart';
 import { requireAdmin } from '@/lib/admin-auth';
-import { prisma } from '@/lib/prisma';
+import { requireDb } from '@/lib/prisma';
 import { scopedWhere } from '@/lib/prisma-tenant';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AnalyticsPage() {
+  const prisma = requireDb();
   const session = await requireAdmin();
   const w = await scopedWhere();
 

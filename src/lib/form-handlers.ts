@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, dbAvailable } from '@/lib/prisma';
 import { tenantCreateData } from '@/lib/prisma-tenant';
 import { clientIp, jsonBlocked, rateLimit } from '@/lib/security';
 import { safeString } from '@/lib/utils';
@@ -45,6 +45,7 @@ function fail(request: NextRequest, message: string, status = 400) {
 }
 
 async function recordAnalytics(event: string, request: NextRequest, data: Record<string, unknown>) {
+  if (!dbAvailable) return;
   await prisma.analyticsEvent.create({
     data: {
       event,
@@ -58,6 +59,7 @@ async function recordAnalytics(event: string, request: NextRequest, data: Record
 }
 
 export async function handlePublicForm(kind: 'admissions' | 'contact' | 'recruiter' | 'alumni' | 'career' | 'newsletter', request: NextRequest) {
+  if (!dbAvailable) return NextResponse.json({ ok: false, error: 'Service temporarily unavailable' }, { status: 503 });
   const limiter = rateLimit(`form:${kind}:${clientIp(request)}`, 20, 15 * 60 * 1000);
   if (!limiter.ok) return jsonBlocked('Too many form submissions. Please try again later.');
   const data = await payloadFromRequest(request);

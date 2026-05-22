@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, dbAvailable } from '@/lib/prisma';
 import { resolveBranchByDomain } from '@/lib/tenant';
 import { headers } from 'next/headers';
 
@@ -12,15 +12,19 @@ export async function GET() {
   const w = branchId ? { branchId } : {};
   const baseUrl = `https://${host}`;
 
-  const [pages, programs, notices, events, blogs] = await Promise.all([
-    prisma.page.findMany({ where: { ...w, status: 'published', deletedAt: null }, select: { slug: true, updatedAt: true } }),
-    prisma.program.findMany({ where: { ...w, status: 'published', deletedAt: null }, select: { slug: true, updatedAt: true } }),
-    prisma.notice.findMany({ where: { ...w, status: 'active', deletedAt: null }, select: { slug: true, updatedAt: true } }),
-    prisma.event.findMany({ where: { ...w, status: 'published' }, select: { slug: true, updatedAt: true } }),
-    prisma.blogPost.findMany({ where: { ...w, status: 'published' }, select: { slug: true, updatedAt: true } }),
-  ]);
+  let pages: any[] = [], programs: any[] = [], notices: any[] = [], events: any[] = [], blogs: any[] = [];
 
-  const urls = [
+  if (dbAvailable) {
+    [pages, programs, notices, events, blogs] = await Promise.all([
+      prisma.page.findMany({ where: { ...w, status: 'published', deletedAt: null }, select: { slug: true, updatedAt: true } }).catch(() => []),
+      prisma.program.findMany({ where: { ...w, status: 'published', deletedAt: null }, select: { slug: true, updatedAt: true } }).catch(() => []),
+      prisma.notice.findMany({ where: { ...w, status: 'active', deletedAt: null }, select: { slug: true, updatedAt: true } }).catch(() => []),
+      prisma.event.findMany({ where: { ...w, status: 'published' }, select: { slug: true, updatedAt: true } }).catch(() => []),
+      prisma.blogPost.findMany({ where: { ...w, status: 'published' }, select: { slug: true, updatedAt: true } }).catch(() => []),
+    ]);
+  }
+
+  const urls: { loc: string; lastmod?: string; priority: string }[] = [
     { loc: baseUrl, lastmod: new Date().toISOString().slice(0, 10), priority: '1.0' },
     { loc: `${baseUrl}/about`, priority: '0.8' },
     { loc: `${baseUrl}/contact`, priority: '0.7' },

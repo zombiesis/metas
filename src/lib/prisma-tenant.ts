@@ -13,7 +13,6 @@ export async function scopedWhere(extra: Record<string, unknown> = {}): Promise<
 
 /**
  * Wraps a Prisma findMany call with automatic branch scoping.
- * Usage: const pages = await tenantFindMany(prisma.page, { orderBy: { slug: 'asc' } });
  */
 export async function tenantFindMany<T>(
   model: { findMany: (args: any) => Promise<T[]> },

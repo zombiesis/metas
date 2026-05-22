@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, dbAvailable } from '@/lib/prisma';
 import { resolveBranchByDomain } from '@/lib/tenant';
 import { headers } from 'next/headers';
 
@@ -16,7 +16,7 @@ export async function GET() {
   let bgColor = '#ffffff';
   let icon = '/assets/images/logos/metas-college-logo.png';
 
-  if (branchId) {
+  if (branchId && dbAvailable) {
     const branch = await prisma.branch.findUnique({ where: { id: branchId }, include: { settings: true } }).catch(() => null);
     if (branch) {
       name = branch.name;

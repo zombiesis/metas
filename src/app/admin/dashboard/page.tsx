@@ -3,7 +3,7 @@ import { AdminChrome } from '@/components/admin/AdminChrome';
 import { BarChart } from '@/components/admin/BarChart';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getAdminMetrics, getChartData } from '@/lib/admin-metrics';
-import { prisma } from '@/lib/prisma';
+import { requireDb } from '@/lib/prisma';
 import { t, getServerLocale } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -18,27 +18,48 @@ function timeAgo(date: Date | string): string {
 }
 
 export default async function AdminDashboard() {
+  const prisma = requireDb();
   const session = await requireAdmin();
   const locale = await getServerLocale();
-  const [metrics, charts, sessionCount, contactCount] = await Promise.all([
+  const [metrics, charts, sessionCount, contactCount, branches] = await Promise.all([
     getAdminMetrics(),
     getChartData(),
     prisma.session.count().catch(() => 0),
     prisma.contactInquiry.count().catch(() => 0),
+    prisma.branch.findMany({
+      include: {
+        domains: true,
+        settings: true,
+        _count: { select: { users: true } },
+      },
+      orderBy: { name: 'asc' },
+    }).catch(() => [] as any[]),
   ]);
+
+  // Per-branch content counts
+  const branchContentCounts = await Promise.all(
+    branches.map(async (b: any) => {
+      const [pages, notices, programs] = await Promise.all([
+        prisma.page.count({ where: { branchId: b.id } }).catch(() => 0),
+        prisma.notice.count({ where: { branchId: b.id } }).catch(() => 0),
+        prisma.program.count({ where: { branchId: b.id } }).catch(() => 0),
+      ]);
+      return { id: b.id, pages, notices, programs, total: pages + notices + programs };
+    })
+  );
+  const contentMap = Object.fromEntries(branchContentCounts.map((c) => [c.id, c]));
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t('good_morning', locale) : hour < 17 ? t('good_afternoon', locale) : t('good_evening', locale);
   const today = new Date().toLocaleDateString(locale === 'en' ? 'en-IN' : `${locale}-IN`, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-  // Real data only — no simulated values
   const totalInquiries = Math.max(contactCount, metrics.forms + metrics.admissions);
   const applications = metrics.forms;
   const enrolled = metrics.admissions;
 
   return (
     <AdminChrome title={t('dashboard', locale)} description="" user={session}>
-      {/* 1. HERO BANNER */}
+
+      {/* ═══ HERO ═══ */}
       <div className="dash-hero">
         <svg className="dash-hero-crest" width="300" height="300" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2L2 7l10 5 10-5-10-5zm0 10.9L3.5 8.2v5.8c0 3.8 3.5 7.2 8.5 8 5-.8 8.5-4.2 8.5-8V8.2L12 12.9z" />
@@ -46,41 +67,99 @@ export default async function AdminDashboard() {
         <div className="dash-hero-meta">
           <h2 className="dash-greeting">{greeting}, {session.username}</h2>
           <p className="dash-date">{today}</p>
-          <span className="dash-hero-tagline">Command Centre</span>
+          <span className="dash-hero-tagline">Enterprise Command Centre</span>
         </div>
       </div>
 
-      {/* 2. HEALTH & SYSTEM WIDGET */}
-      <div className="school-health">
-        <div className="health-pill">
-          <div className="health-indicator ok"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div>
-          <div>
-            <span className="health-pill-label">Public Website</span>
-            <span className="health-pill-status">Online</span>
-          </div>
+      {/* ═══ PLATFORM OVERVIEW ═══ */}
+      <div className="platform-overview">
+        <div className="po-stat">
+          <span className="po-stat-value">{branches.length}</span>
+          <span className="po-stat-label">Branches</span>
         </div>
-        <div className="health-pill">
-          <div className="health-indicator ok"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div>
-          <div>
-            <span className="health-pill-label">Database Status</span>
-            <span className="health-pill-status">Connected ({sessionCount} sessions)</span>
-          </div>
+        <div className="po-divider" />
+        <div className="po-stat">
+          <span className="po-stat-value">{branches.reduce((s: number, b: any) => s + (b.domains?.length || 0), 0)}</span>
+          <span className="po-stat-label">Domains</span>
         </div>
-        <div className="health-pill">
-          <div className="health-indicator ok"><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg></div>
-          <div>
-            <span className="health-pill-label">Security Events</span>
-            <span className="health-pill-status">{metrics.securityWarnings} warnings</span>
-          </div>
+        <div className="po-divider" />
+        <div className="po-stat">
+          <span className="po-stat-value">{metrics.users}</span>
+          <span className="po-stat-label">Users</span>
+        </div>
+        <div className="po-divider" />
+        <div className="po-stat">
+          <span className="po-stat-value">{sessionCount}</span>
+          <span className="po-stat-label">Sessions</span>
+        </div>
+        <div className="po-divider" />
+        <div className="po-stat">
+          <span className="po-stat-value po-healthy">●</span>
+          <span className="po-stat-label">All Systems</span>
         </div>
       </div>
 
+
+      {/* ═══ BRANCH DEPLOYMENT STATUS ═══ */}
+      <div className="dash-divider">
+        <span className="dash-divider-label">Branch Deployment Status</span>
+        <div className="dash-divider-line" />
+        <Link href="/admin/branches" className="dash-divider-action">Manage All →</Link>
+      </div>
+
+      <div className="branch-grid">
+        {branches.map((b: any) => {
+          const primary = b.domains?.find((d: any) => d.isPrimary) || b.domains?.[0];
+          const hasDomain = b.domains?.length > 0;
+          const content = contentMap[b.id] || { pages: 0, notices: 0, programs: 0, total: 0 };
+          const cfPlan = b.settings?.cfPlan || 'free';
+          const isLive = b.status === 'active' && hasDomain;
+          return (
+            <article key={b.id} className={`branch-card ${isLive ? 'branch-live' : 'branch-pending'}`}>
+              <div className="branch-card-header">
+                <div className="branch-card-title">
+                  <span className={`branch-status-dot ${isLive ? 'live' : 'pending'}`} />
+                  <h4>{b.name}</h4>
+                </div>
+                <span className={`branch-badge ${cfPlan}`}>{cfPlan}</span>
+              </div>
+              <div className="branch-card-domain">
+                {primary ? (
+                  <a href={`https://${primary.domain}`} target="_blank" rel="noopener noreferrer">{primary.domain}</a>
+                ) : (
+                  <span className="branch-no-domain">No domain configured</span>
+                )}
+              </div>
+              <div className="branch-card-stats">
+                <span><strong>{content.pages}</strong> pages</span>
+                <span><strong>{content.notices}</strong> notices</span>
+                <span><strong>{content.programs}</strong> programs</span>
+                <span><strong>{b._count?.users || 0}</strong> users</span>
+              </div>
+              <div className="branch-card-footer">
+                <span className={`branch-deploy-status ${isLive ? 'deployed' : 'setup'}`}>
+                  {isLive ? '● Live' : '○ Setup needed'}
+                </span>
+                <Link href={`/admin/branches/${b.id}/theme`} className="branch-card-link">Configure →</Link>
+              </div>
+            </article>
+          );
+        })}
+        {branches.length === 0 && (
+          <div className="branch-empty">
+            <p>No branches yet.</p>
+            <Link href="/admin/branches" className="btn gold">+ Create First Branch</Link>
+          </div>
+        )}
+      </div>
+
+
+      {/* ═══ KPI CARDS ═══ */}
       <div className="dash-divider">
         <span className="dash-divider-label">Key Performance Indicators</span>
         <div className="dash-divider-line" />
       </div>
 
-      {/* 3. KPI CARDS */}
       <div className="kpi-grid">
         <Link href="/admin/admissions" className="kpi-card" style={{'--kpi-color': '#14b8a6'} as any}>
           <div className="kpi-top">
@@ -114,14 +193,23 @@ export default async function AdminDashboard() {
           <span className="kpi-value">{metrics.documents}</span>
           <span className="kpi-label">{t('documents', locale)}</span>
         </Link>
+        <Link href="/admin/security" className="kpi-card" style={{'--kpi-color': '#ef4444'} as any}>
+          <div className="kpi-top">
+            <div className="kpi-icon"><svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg></div>
+            {metrics.securityWarnings > 0 && <span className="kpi-trend warn">{metrics.securityWarnings}</span>}
+          </div>
+          <span className="kpi-value">{metrics.failedLogins}</span>
+          <span className="kpi-label">Security Events</span>
+        </Link>
       </div>
 
+
+      {/* ═══ ANALYTICS ═══ */}
       <div className="dash-divider">
-        <span className="dash-divider-label">Analytics & Operations</span>
+        <span className="dash-divider-label">Analytics &amp; Operations</span>
         <div className="dash-divider-line" />
       </div>
 
-      {/* 4. CHARTS & CALENDAR */}
       <div className="grid two dash-section">
         <article className="card" style={{gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px'}}>
           <div>
@@ -136,29 +224,27 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid two dash-section">
-        {/* Funnel */}
         <article className="card">
           <div className="card-header"><h3>Admissions Pipeline</h3></div>
           <div className="funnel-wrap">
             <div className="funnel-row">
               <span className="funnel-label">Inquiries</span>
-              <div className="funnel-bar-bg"><div className="funnel-bar-fill" style={{width: '100%', background: '#3b82f6'}}></div></div>
+              <div className="funnel-bar-bg"><div className="funnel-bar-fill" style={{width: '100%', background: '#3b82f6'}} /></div>
               <span className="funnel-value">{totalInquiries}</span>
             </div>
             <div className="funnel-row">
               <span className="funnel-label">Applications</span>
-              <div className="funnel-bar-bg"><div className="funnel-bar-fill" style={{width: `${(applications/Math.max(totalInquiries,1))*100}%`, background: '#8b5cf6'}}></div></div>
+              <div className="funnel-bar-bg"><div className="funnel-bar-fill" style={{width: `${(applications/Math.max(totalInquiries,1))*100}%`, background: '#8b5cf6'}} /></div>
               <span className="funnel-value">{applications}</span>
             </div>
             <div className="funnel-row">
               <span className="funnel-label">Enrolled</span>
-              <div className="funnel-bar-bg"><div className="funnel-bar-fill" style={{width: `${(enrolled/Math.max(totalInquiries,1))*100}%`, background: '#14b8a6'}}></div></div>
+              <div className="funnel-bar-bg"><div className="funnel-bar-fill" style={{width: `${(enrolled/Math.max(totalInquiries,1))*100}%`, background: '#14b8a6'}} /></div>
               <span className="funnel-value">{enrolled}</span>
             </div>
           </div>
         </article>
 
-        {/* Upcoming Events from DB */}
         <article className="card">
           <div className="card-header"><h3>Upcoming</h3><Link className="card-link" href="/admin/events">Manage →</Link></div>
           {metrics.upcomingEvents.length ? (
@@ -173,22 +259,22 @@ export default async function AdminDashboard() {
                 </li>
               ))}
             </ul>
-          ) : <p className="empty-hint">No upcoming events. Add events in the Events page.</p>}
+          ) : <p className="empty-hint">No upcoming events.</p>}
         </article>
       </div>
 
+      {/* ═══ ACTIVITY & QUICK ACTIONS ═══ */}
       <div className="dash-divider">
-        <span className="dash-divider-label">Recent Activity & Shortcuts</span>
+        <span className="dash-divider-label">Recent Activity &amp; Quick Actions</span>
         <div className="dash-divider-line" />
       </div>
 
-      {/* 5. ACTIVITY & ACTIONS */}
       <div className="grid two dash-section">
         <article className="card">
           <div className="card-header"><h3>{t('recent_activity', locale)}</h3><Link className="card-link" href="/admin/audit-logs">{t('view_all', locale)} →</Link></div>
           {metrics.recentAudit.length ? (
             <div className="dash-timeline">
-              {metrics.recentAudit.slice(0, 4).map((log) => (
+              {metrics.recentAudit.slice(0, 5).map((log) => (
                 <div key={log.id} className="dash-timeline-item">
                   <span className={`dash-timeline-dot ${log.action.includes('delete') ? 'red' : log.action.includes('create') ? 'green' : 'blue'}`} />
                   <div>
@@ -207,6 +293,10 @@ export default async function AdminDashboard() {
 
         <article className="card" style={{background: 'transparent', boxShadow: 'none', border: 'none', padding: 0}}>
           <div className="dash-actions">
+            <Link className="dash-action-card" href="/admin/branches">
+              <svg width="24" height="24" fill="none" stroke="#0ea5e9" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 003 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+              <span>Deploy Branch</span>
+            </Link>
             <Link className="dash-action-card" href="/admin/homepage">
               <svg width="24" height="24" fill="none" stroke="#e5b94e" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
               <span>{t('edit_homepage', locale)}</span>
@@ -214,14 +304,6 @@ export default async function AdminDashboard() {
             <Link className="dash-action-card" href="/admin/notices">
               <svg width="24" height="24" fill="none" stroke="#f59e0b" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
               <span>{t('add_notice', locale)}</span>
-            </Link>
-            <Link className="dash-action-card" href="/admin/documents">
-              <svg width="24" height="24" fill="none" stroke="#3b82f6" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-              <span>{t('upload_document', locale)}</span>
-            </Link>
-            <Link className="dash-action-card" href="/admin/media">
-              <svg width="24" height="24" fill="none" stroke="#8b5cf6" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" /></svg>
-              <span>{t('upload_media', locale)}</span>
             </Link>
             <Link className="dash-action-card" href="/admin/programs">
               <svg width="24" height="24" fill="none" stroke="#14b8a6" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342" /></svg>
@@ -231,11 +313,15 @@ export default async function AdminDashboard() {
               <svg width="24" height="24" fill="none" stroke="#ec4899" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
               <span>{t('users', locale)}</span>
             </Link>
+            <Link className="dash-action-card" href="/admin/security">
+              <svg width="24" height="24" fill="none" stroke="#ef4444" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+              <span>Security</span>
+            </Link>
           </div>
         </article>
       </div>
 
-      <p className="dashboard-timestamp">System Status: {metrics.securityWarnings > 0 ? `${metrics.securityWarnings} warning${metrics.securityWarnings > 1 ? 's' : ''}` : 'Healthy'} • Last refreshed: {new Date().toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
+      <p className="dashboard-timestamp">System Status: {metrics.securityWarnings > 0 ? `${metrics.securityWarnings} warning${metrics.securityWarnings > 1 ? 's' : ''}` : 'All Systems Healthy'} • {new Date().toLocaleString('en-IN', { hour: '2-digit', minute: '2-digit' })}</p>
     </AdminChrome>
   );
 }

@@ -3,13 +3,14 @@ import { AdminChrome } from '@/components/admin/AdminChrome';
 import { BranchThemeEditor } from '@/components/admin/BranchThemeEditor';
 import { BranchFeatureFlags } from '@/components/admin/BranchFeatureFlags';
 import { requireAdmin } from '@/lib/admin-auth';
-import { prisma } from '@/lib/prisma';
+import { requireDb } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 type Params = Promise<{ id: string }>;
 
 export default async function BranchThemePage({ params }: { params: Params }) {
+  const prisma = requireDb();
   const session = await requireAdmin();
   const { id } = await params;
   const branch = await prisma.branch.findUnique({ where: { id }, include: { settings: true } });

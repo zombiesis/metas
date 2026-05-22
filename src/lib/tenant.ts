@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { prisma } from '@/lib/prisma';
+import { prisma, dbAvailable } from '@/lib/prisma';
 import { BRANCH_COOKIE, verifyBranchCookie } from '@/lib/branch-cookie';
 import { SESSION_COOKIE } from '@/lib/session-constants';
 
@@ -10,6 +10,7 @@ const cache = new Map<string, { branchId: string; expires: number }>();
 const TTL = 5 * 60 * 1000;
 
 export async function resolveBranchByDomain(domain: string): Promise<string | null> {
+  if (!dbAvailable) return DEFAULT_BRANCH_ID;
   const cached = cache.get(domain);
   if (cached && cached.expires > Date.now()) return cached.branchId;
 
@@ -28,6 +29,7 @@ export async function resolveBranchByDomain(domain: string): Promise<string | nu
 
 /** Read userId from the active admin session cookie WITHOUT touching `lastActiveAt`. */
 async function readActiveSessionUserId(cookieHeader: string): Promise<string | null> {
+  if (!dbAvailable) return null;
   const cookieMatch = cookieHeader.match(new RegExp(`${SESSION_COOKIE}=([^;]+)`));
   if (!cookieMatch) return null;
   const raw = decodeURIComponent(cookieMatch[1]);

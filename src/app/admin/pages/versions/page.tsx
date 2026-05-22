@@ -1,10 +1,11 @@
 import { AdminChrome } from '@/components/admin/AdminChrome';
 import { requireAdmin } from '@/lib/admin-auth';
-import { prisma } from '@/lib/prisma';
+import { requireDb } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PageVersions() {
+  const prisma = requireDb();
   const session = await requireAdmin();
   const versions = await prisma.pageVersion.findMany({ orderBy: { createdAt: 'desc' }, take: 100, include: { page: true } }).catch(() => []);
   return (

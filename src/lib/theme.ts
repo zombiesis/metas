@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { prisma, dbAvailable } from '@/lib/prisma';
 import { getCurrentBranchId } from '@/lib/tenant';
 
 export type BranchTheme = {
@@ -28,6 +28,7 @@ const DEFAULT_THEME: BranchTheme = {
 };
 
 export async function getBranchTheme(): Promise<BranchTheme> {
+  if (!dbAvailable) return DEFAULT_THEME;
   const branchId = await getCurrentBranchId();
   if (!branchId) return DEFAULT_THEME;
 

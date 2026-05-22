@@ -1,11 +1,12 @@
 import { AdminChrome } from '@/components/admin/AdminChrome';
 import { BranchManager } from '@/components/admin/BranchManager';
 import { requireAdmin } from '@/lib/admin-auth';
-import { prisma } from '@/lib/prisma';
+import { requireDb } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export default async function BranchesPage() {
+  const prisma = requireDb();
   const session = await requireAdmin();
   const branches = await prisma.branch.findMany({
     orderBy: { name: 'asc' },

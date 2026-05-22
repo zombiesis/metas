@@ -5,7 +5,7 @@ import { PasswordChangeForm } from '@/components/admin/PasswordChangeForm';
 import { SessionManager } from '@/components/admin/SessionManager';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getAdminCollectionConfig } from '@/lib/admin-fields';
-import { prisma } from '@/lib/prisma';
+import { requireDb } from '@/lib/prisma';
 import { t, getServerLocale } from '@/lib/i18n';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +24,7 @@ const checklist = [
 ];
 
 export default async function SecurityAdmin() {
+  const prisma = requireDb();
   const session = await requireAdmin();
   const locale = await getServerLocale();
   const [events, users, sessions, currentUser] = await Promise.all([

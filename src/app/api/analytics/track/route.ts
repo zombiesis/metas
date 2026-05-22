@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma, dbAvailable } from '@/lib/prisma';
 import { clientIp, rateLimit } from '@/lib/security';
 import { safeString } from '@/lib/utils';
 
@@ -7,6 +7,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
+  if (!dbAvailable) return NextResponse.json({ ok: true });
   const limiter = rateLimit(`analytics:${clientIp(request)}`, 120, 60 * 1000);
   if (!limiter.ok) return NextResponse.json({ ok: false }, { status: 200 });
   const data = await request.json().catch(() => ({}));

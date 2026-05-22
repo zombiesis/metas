@@ -1,6 +1,6 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { prisma } from '@/lib/prisma';
+import { prisma, dbAvailable } from '@/lib/prisma';
 import { scopedWhere } from '@/lib/prisma-tenant';
 import { parseJson, slugify, toJson } from '@/lib/utils';
 
@@ -356,6 +356,7 @@ export async function listUploads() {
 
 
 export async function readAdminCollection<T = unknown>(collection: CMSCollection): Promise<T> {
+  if (!dbAvailable) return [] as T;
   const w = await scopedWhere();
   switch (collection) {
     case 'site': return [await getSiteSettings()] as T;
@@ -385,6 +386,7 @@ export async function readAdminCollection<T = unknown>(collection: CMSCollection
 }
 
 export async function bumpDocumentDownload(slugOrId: string) {
+  if (!dbAvailable) return;
   try {
     await prisma.document.update({ where: { id: slugOrId }, data: { downloadCount: { increment: 1 } } });
   } catch {

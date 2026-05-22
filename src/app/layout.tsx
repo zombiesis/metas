@@ -7,7 +7,7 @@ import { readCMSCollection, type SiteSettings } from '@/lib/cms-file';
 import { collegeSchema } from '@/lib/schema';
 import { getBranchTheme, themeToCssVars, sanitizeCustomCss } from '@/lib/theme';
 import { getCurrentBranchId } from '@/lib/tenant';
-import { prisma } from '@/lib/prisma';
+import { prisma, dbAvailable } from '@/lib/prisma';
 import { getCspNonce } from '@/lib/csp-nonce';
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import { PageTransition } from '@/components/PageTransition';
@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const branchId = await getCurrentBranchId();
   let branchName = 'Metas Adventist College';
   let tagline = 'Values-Based Higher Education';
-  if (branchId) {
+  if (branchId && dbAvailable) {
     const branch = await prisma.branch.findUnique({ where: { id: branchId }, include: { settings: true } }).catch(() => null);
     if (branch) { branchName = branch.name; tagline = branch.settings?.tagline || tagline; }
   }
