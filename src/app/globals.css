@@ -3079,36 +3079,25 @@ label { font-size: .8rem !important; font-weight: 600 !important; letter-spacing
 
 
 /* ============================================
-   COMPREHENSIVE MOBILE OVERHAUL — v2
+   COMPREHENSIVE MOBILE FIXES
    ============================================ */
 
-/* Global: prevent horizontal overflow */
-html, body {
-  overflow-x: hidden;
-  max-width: 100vw;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
+/* Prevent horizontal overflow globally */
+html, body { overflow-x: hidden; max-width: 100vw; }
 * { box-sizing: border-box; }
-img, video, iframe { max-width: 100%; height: auto; }
+img, video { max-width: 100%; height: auto; }
 
-/* ============================================
-   TABLETS (≤1024px)
-   ============================================ */
+/* Tablet & smaller (≤1024px) */
 @media (max-width: 1024px) {
-  .nav-cta { padding: 8px 14px; font-size: 0.78rem; }
-  .top { font-size: 0.72rem; padding: 6px 0; }
-  .top .wrap { gap: 12px; }
-  .hero-slider { height: 75vh; min-height: 480px; }
-  .hero-counter { top: 20px; right: 24px; }
-  .hero-counter-current { font-size: 1.5rem; }
+  /* Hide desktop nav links, show mobile toggle */
+  .nav-cta { padding: 8px 14px; font-size: 0.8rem; }
+  .top { font-size: 0.7rem; padding: 6px 0; }
+  .top .wrap { gap: 10px; }
 }
 
-/* ============================================
-   MOBILE (≤768px)
-   ============================================ */
+/* Mobile (≤768px) */
 @media (max-width: 768px) {
-  /* ---------- TOP BAR (phone numbers + email) ---------- */
+  /* ========== TOP BAR ========== */
   .top {
     font-size: 0.7rem;
     padding: 8px 0;
@@ -3122,193 +3111,107 @@ img, video, iframe { max-width: 100%; height: auto; }
   }
   .top-left, .top-right {
     flex-wrap: wrap;
-    gap: 10px 14px;
+    gap: 10px;
     width: 100%;
     justify-content: flex-start;
-    font-size: 0.7rem;
   }
   .top-left span, .top-right span {
     font-size: 0.7rem;
-    word-break: break-word;
   }
-  .top span svg { width: 10px; height: 10px; flex-shrink: 0; }
-  .top a { font-size: 0.7rem; }
+  .top span svg { width: 10px; height: 10px; }
 
-  /* ---------- NAV BAR ---------- */
+  /* ========== NAV BAR ========== */
   .nav {
-    padding: 0 14px;
+    padding: 0 12px;
     height: 60px;
-    gap: 10px;
+    gap: 8px;
   }
-  .brand { flex-shrink: 0; }
   .brand img { height: 36px; }
   .nav-cta {
     padding: 8px 12px;
-    font-size: 0.72rem;
-    white-space: nowrap;
+    font-size: 0.75rem;
   }
+
+  /* Mobile menu panel */
   .nav nav {
-    width: 290px;
-    max-width: 88vw;
-    padding: 76px 20px 20px;
-  }
-  .nav nav .nav-link {
-    font-size: 0.92rem;
-    padding: 12px 14px;
+    width: 280px;
+    max-width: 85vw;
   }
 
-  /* ---------- HERO SLIDER (homepage main) ---------- */
-  .hero-slider {
-    height: auto;
-    min-height: 0;
-  }
-  .hero-slide {
-    position: relative;
-    min-height: 380px;
-    aspect-ratio: 4 / 3;
-  }
-  .hero-counter {
-    top: 14px;
-    right: 16px;
-    font-size: 0.8rem;
-  }
-  .hero-counter-current { font-size: 1.2rem; }
-  .hero-panel {
-    padding: 24px 0 20px;
-    background: linear-gradient(to top, rgba(10,22,40,0.95) 0%, rgba(10,22,40,0.85) 60%, rgba(10,22,40,0.4) 100%);
-  }
-  .hero-panel-inner {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    align-items: stretch;
-  }
-  .hero-panel-eyebrow {
-    font-size: 0.65rem;
-    margin-bottom: 6px;
-  }
-  .hero-panel-title {
-    font-size: clamp(1.4rem, 6.5vw, 2rem);
-    line-height: 1.2;
-  }
-  .hero-panel-sub {
-    font-size: 0.85rem;
-    line-height: 1.5;
-  }
-  .hero-panel-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding-bottom: 0;
-  }
-  .hero-panel-actions .btn {
-    flex: 1 1 auto;
-    min-width: 130px;
-    font-size: 0.78rem;
-    padding: 10px 14px;
-  }
-  .hero-dots { padding-top: 14px; }
-  .hero-dot { width: 6px; height: 6px; }
-  .hero-dot.active { width: 22px; }
-
-  /* Old/static hero (for non-homepage pages) */
+  /* ========== HERO ========== */
   .hero {
-    min-height: 50vh;
-    padding: 32px 0;
+    min-height: 60vh;
+    padding: 40px 0;
   }
   .hero h1 {
-    font-size: clamp(1.7rem, 7vw, 2.6rem);
+    font-size: clamp(1.8rem, 7vw, 2.8rem);
     line-height: 1.15;
   }
-  .hero p { font-size: 0.95rem; line-height: 1.5; }
+  .hero p {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
   .actions {
     gap: 10px;
-    margin-top: 18px;
+    margin-top: 20px;
   }
   .actions .btn {
     padding: 10px 16px;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
   }
 
-  /* ---------- NOTICE TICKER ---------- */
+  /* ========== NOTICE TICKER ========== */
   .notice-ticker { padding: 8px 0; }
   .notice-ticker .wrap {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-    padding: 0 14px;
   }
-  .ticker-label {
-    font-size: 0.6rem;
-    padding: 3px 10px;
-  }
-  .ticker-track {
-    width: 100%;
-  }
-  .ticker-content { animation-duration: 24s; gap: 12px; }
-  .ticker-content a { font-size: 0.72rem; padding: 3px 8px; }
-  .ticker-cat, .ticker-new { font-size: 0.58rem; padding: 1px 6px; }
+  .ticker-content a { font-size: 0.75rem; padding: 3px 8px; }
+  .ticker-cat, .ticker-new { font-size: 0.6rem; padding: 1px 6px; }
 
-  /* ---------- SECTIONS ---------- */
+  /* ========== SECTIONS ========== */
   .section { padding: 40px 0; }
   .section h2 {
-    font-size: clamp(1.3rem, 5.5vw, 1.9rem);
-    margin-bottom: 18px;
-    line-height: 1.25;
+    font-size: clamp(1.4rem, 5.5vw, 2rem);
+    margin-bottom: 20px;
   }
-  .eyebrow { font-size: 0.68rem; margin-bottom: 6px; }
+  .eyebrow { font-size: 0.7rem; }
 
-  /* ---------- ABOUT GRID + INQUIRY FORM ---------- */
+  /* ========== ABOUT GRID + INQUIRY FORM ========== */
   .about-grid {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 32px;
   }
-  .about-body p {
-    font-size: 0.92rem;
-    line-height: 1.65;
-    margin-bottom: 12px;
-  }
-  .mvv-cards {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-top: 20px;
-  }
+  .about-body p { font-size: 0.92rem; line-height: 1.6; }
+  .mvv-cards { grid-template-columns: 1fr; gap: 12px; }
   .mvv-card { padding: 16px; }
-  .mvv-card h3 { font-size: 0.95rem; }
-  .mvv-card p, .mvv-card ul { font-size: 0.85rem; }
   .inquiry-form-wrap h3 {
     font-size: 1.05rem;
-    padding: 14px 18px;
+    padding: 16px 20px;
   }
-  .inquiry-form { padding: 18px; gap: 10px; }
-  .inquiry-form label { font-size: 0.82rem; }
+  .inquiry-form { padding: 20px; gap: 12px; }
   .inquiry-form input,
   .inquiry-form select,
   .inquiry-form textarea {
     width: 100%;
-    padding: 11px 13px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
   }
-  .inquiry-form .btn { padding: 13px; font-size: 0.85rem; }
-  .inquiry-whatsapp { font-size: 0.8rem; padding: 0 18px 16px; }
+  .inquiry-form .btn { padding: 12px; font-size: 0.85rem; }
 
-  /* ---------- WHY CHOOSE METAS ---------- */
-  .why-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-  .why-card { padding: 18px 16px; }
-  .why-card h3 { font-size: 1rem; margin-bottom: 8px; }
-  .why-card p { font-size: 0.85rem; line-height: 1.55; }
+  /* ========== WHY CHOOSE METAS ========== */
+  .why-grid { grid-template-columns: 1fr; gap: 14px; }
+  .why-card { padding: 20px 18px; }
+  .why-card h3 { font-size: 1.05rem; }
+  .why-card p { font-size: 0.85rem; }
 
-  /* ---------- COURSE GRID ---------- */
-  .course-grid {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
+  /* ========== COURSE GRID ========== */
+  .course-grid { grid-template-columns: 1fr; gap: 20px; }
   .course-card-body { padding: 16px 18px 18px; }
-  .course-card-body h3 { font-size: 1.08rem; margin-bottom: 4px; }
-  .course-meta { font-size: 0.75rem; margin-bottom: 12px; }
+  .course-card-body h3 { font-size: 1.1rem; }
 
-  /* ---------- RESOURCE CARDS ---------- */
+  /* ========== RESOURCE CARDS ========== */
   .resource-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -3317,271 +3220,148 @@ img, video, iframe { max-width: 100%; height: auto; }
   .resource-card {
     min-width: 0;
     padding: 14px 10px;
-    gap: 6px;
   }
   .resource-card img { height: 28px; }
   .resource-card strong { font-size: 0.78rem; }
-  .resource-card span { font-size: 0.66rem; line-height: 1.3; }
+  .resource-card span { font-size: 0.68rem; }
 
-  /* ---------- STATS BAR ---------- */
+  /* ========== STATS BAR ========== */
   .stats-bar { padding: 32px 0; }
   .stats-bar .wrap {
     grid-template-columns: repeat(2, 1fr);
     gap: 0;
   }
   .stats-bar .wrap > * + * { border-left: none; }
-  .counter-wrap { padding: 14px 12px; }
-  .counter-number {
-    font-size: clamp(1.8rem, 8vw, 2.5rem);
-    margin-bottom: 4px;
-  }
-  .counter-label {
-    font-size: 0.62rem;
-    letter-spacing: 0.06em;
-    line-height: 1.3;
-  }
+  .counter-wrap { padding: 14px 16px; }
+  .counter-number { font-size: clamp(1.8rem, 7vw, 2.5rem); margin-bottom: 6px; }
+  .counter-label { font-size: 0.65rem; letter-spacing: 0.08em; }
 
-  /* ---------- FACULTY GRID ---------- */
+  /* ========== FACULTY GRID ========== */
   .faculty-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 14px;
   }
-  .faculty-card { padding: 16px 10px; }
+  .faculty-card { padding: 18px 12px; }
   .faculty-photo, .faculty-avatar {
-    width: 64px;
-    height: 64px;
-    font-size: 1.2rem;
-    margin-bottom: 10px;
+    width: 70px;
+    height: 70px;
+    font-size: 1.3rem;
   }
-  .faculty-card h3 { font-size: 0.88rem; line-height: 1.3; }
-  .faculty-role { font-size: 0.66rem; }
-  .faculty-dept { font-size: 0.7rem; line-height: 1.3; }
-  .faculty-card small { font-size: 0.66rem; }
+  .faculty-card h3 { font-size: 0.92rem; }
+  .faculty-role { font-size: 0.7rem; }
+  .faculty-dept { font-size: 0.72rem; }
+  .faculty-card small { font-size: 0.7rem; }
 
-  /* ---------- NOTICE LAYOUT (Notice Board + Events) ---------- */
-  .notice-layout, .home-notices-grid {
-    grid-template-columns: 1fr !important;
-    gap: 28px;
+  /* ========== NOTICE LAYOUT (Notice Board + Events) ========== */
+  .notice-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
   }
-
-  /* Tab Notice Board */
-  .tab-header {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .tab-header::-webkit-scrollbar { display: none; }
-  .tab-header button {
-    flex-shrink: 0;
-    font-size: 0.74rem;
-    padding: 10px 12px;
-  }
-  .tab-content { padding: 12px; max-height: 280px; }
-  .tab-content a { font-size: 0.82rem; }
-  .tab-badge { font-size: 0.55rem; padding: 1px 5px; }
-
-  /* Timeline */
   .timeline-item {
     grid-template-columns: 56px 1fr;
     gap: 12px;
     padding: 12px 0;
   }
-  .tl-date span { font-size: 0.82rem; }
+  .tl-date span { font-size: 0.85rem; }
   .tl-date small { font-size: 0.65rem; }
-  .timeline-item strong { font-size: 0.88rem; }
-  .timeline-item p { font-size: 0.76rem; line-height: 1.4; }
+  .timeline-item strong { font-size: 0.9rem; }
+  .timeline-item p { font-size: 0.78rem; }
 
-  /* ---------- EVENTS GRID ---------- */
-  .events-grid {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-  .blog-card > div { padding: 14px 16px 16px; }
-  .blog-card h3 { font-size: 1rem; line-height: 1.3; }
-  .blog-card p { font-size: 0.82rem; }
-  .blog-date { font-size: 0.7rem; }
+  /* ========== EVENTS GRID ========== */
+  .events-grid { grid-template-columns: 1fr; gap: 20px; }
+  .blog-card > div { padding: 16px; }
+  .blog-card h3 { font-size: 1rem; }
 
-  /* ---------- AFFILIATIONS ---------- */
+  /* ========== AFFILIATIONS ========== */
   .affil-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 12px;
   }
-  .affil-card { padding: 14px 8px; }
-  .affil-card img { height: 28px; }
-  .affil-card strong {
-    font-size: 0.74rem;
-    line-height: 1.25;
-    margin-bottom: 2px;
-  }
-  .affil-card span { font-size: 0.65rem; }
-  .affil-status {
-    font-size: 0.58rem !important;
-    padding: 1px 6px;
-  }
+  .affil-card { padding: 16px 10px; }
+  .affil-card img { height: 32px; }
+  .affil-card strong { font-size: 0.78rem; }
+  .affil-card span { font-size: 0.7rem; }
 
-  /* ---------- CTA DARK SECTION ---------- */
+  /* ========== CTA DARK SECTION ========== */
   .cta-grid {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 32px;
   }
-  .cta-dark { padding: 40px 0; }
-  .cta-dark h2 {
-    font-size: clamp(1.4rem, 6vw, 1.9rem);
-    margin-bottom: 12px;
-  }
-  .cta-dark p {
-    font-size: 0.88rem;
-    margin-bottom: 18px;
-  }
-  .cta-contact h3 { font-size: 1rem; margin-bottom: 12px; }
-  .cta-contact p {
-    font-size: 0.82rem;
-    margin: 6px 0;
-    word-break: break-word;
-  }
-  .cta-hours { font-size: 0.72rem !important; }
+  .cta-dark h2 { font-size: clamp(1.5rem, 6vw, 2rem); }
+  .cta-dark p { font-size: 0.9rem; }
+  .cta-contact h3 { font-size: 1.05rem; }
+  .cta-contact p { font-size: 0.85rem; word-break: break-word; }
 
-  /* ---------- FOOTER ---------- */
-  .footer { padding: 40px 0 24px; }
+  /* ========== TAB NOTICE BOARD ========== */
+  .tab-notice-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-notice-tabs::-webkit-scrollbar { display: none; }
+  .tab-notice-tabs button {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 8px 12px;
+  }
+
+  /* ========== FOOTER ========== */
   .foot {
     grid-template-columns: 1fr !important;
-    gap: 28px;
+    gap: 24px;
+    padding: 0 16px;
   }
-  .foot img { width: 140px; }
-  .foot h2 {
-    font-size: 0.95rem;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-  }
-  .foot a {
-    font-size: 0.85rem;
-    margin: 8px 0;
-    word-break: break-word;
-  }
-  .foot p { font-size: 0.82rem; }
-  .footer-est { font-size: 0.65rem; padding: 3px 10px; }
-  .footer-socials { gap: 10px; margin-top: 12px; }
-  .footer-social { width: 32px; height: 32px; }
-  .copyright {
-    font-size: 0.72rem;
-    margin-top: 28px;
-    padding-top: 20px;
-    line-height: 1.5;
-  }
+  .foot h3, .foot strong { font-size: 0.95rem; }
+  .foot a, .foot p { font-size: 0.85rem; word-break: break-word; }
 
-  /* ---------- UTILITY ---------- */
-  .wrap { width: calc(100% - 28px); }
-  h1 { font-size: clamp(1.7rem, 7vw, 2.5rem); }
-  h2 { font-size: clamp(1.3rem, 5.5vw, 1.9rem); }
-  h3 { font-size: clamp(1rem, 4vw, 1.25rem); }
-  p { font-size: 0.92rem; line-height: 1.6; }
+  /* ========== UTILITY ========== */
+  .wrap { width: calc(100% - 24px); }
+  h1 { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+  h2 { font-size: clamp(1.4rem, 5.5vw, 2rem); }
+  h3 { font-size: clamp(1.05rem, 4vw, 1.3rem); }
 
-  /* Buttons – tappable and not too wide */
+  /* Buttons – tappable size */
   .btn {
-    min-height: 42px;
+    min-height: 44px;
     padding: 10px 18px;
     font-size: 0.85rem;
   }
-  .btn.full { width: 100%; }
 
-  /* All form inputs prevent iOS zoom */
+  /* Forms general */
   input, select, textarea {
-    font-size: 16px !important;
+    font-size: 16px !important; /* prevents iOS zoom */
     max-width: 100%;
-  }
-
-  /* Generic form grids → single column */
-  .formgrid, .grid.two, .grid.three, .grid.four,
-  .programgrid, .stats, .twocol {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Cards inside sections */
-  .card, .form, .doc { padding: 18px; }
-
-  /* Chatbot widget — keep out of the way */
-  .chatbot-toggle {
-    bottom: 16px !important;
-    right: 16px !important;
-    width: 52px !important;
-    height: 52px !important;
-  }
-  .chatbot-window {
-    bottom: 80px !important;
-    right: 12px !important;
-    width: calc(100vw - 24px) !important;
-    max-width: 360px !important;
   }
 }
 
-/* ============================================
-   SMALL MOBILE (≤480px)
-   ============================================ */
+/* Small mobile (≤480px) */
 @media (max-width: 480px) {
-  /* Top bar gets even tighter */
-  .top { padding: 6px 0; }
-  .top .wrap { padding: 0 12px; gap: 4px; }
-  .top-left, .top-right { gap: 8px 12px; }
+  .top .wrap { padding: 0 12px; }
+  .top-left, .top-right { gap: 8px; }
   .top span { font-size: 0.65rem; }
 
-  /* Nav */
   .nav { padding: 0 10px; height: 56px; }
   .brand img { height: 32px; }
   .nav-cta {
     padding: 6px 10px;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
   }
 
-  /* Hero */
-  .hero-slide { min-height: 340px; }
-  .hero-panel-title { font-size: clamp(1.2rem, 7vw, 1.7rem); }
-  .hero-panel-sub { font-size: 0.78rem; }
-  .hero-panel-actions .btn {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  .hero h1 { font-size: clamp(1.5rem, 8vw, 2.2rem); }
+  .hero h1 { font-size: clamp(1.6rem, 8vw, 2.4rem); }
   .section { padding: 32px 0; }
   .wrap { width: calc(100% - 20px); }
 
-  /* Single column for tighter views */
   .faculty-grid, .affil-grid {
     grid-template-columns: 1fr;
   }
   .resource-row {
     grid-template-columns: 1fr;
   }
-  .stats-bar .wrap {
-    grid-template-columns: 1fr;
-  }
-  .counter-wrap {
-    padding: 10px 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-  .counter-wrap:last-child { border-bottom: none; }
 }
 
-/* ============================================
-   TOUCH-FRIENDLY TAP TARGETS
-   ============================================ */
+/* Touch-friendly tap targets */
 @media (hover: none) and (pointer: coarse) {
   a, button, .btn, .nav-link {
     min-height: 44px;
   }
-  /* Disable hover transforms that feel sticky on touch */
-  .why-card:hover, .course-card:hover, .faculty-card:hover,
-  .affil-card:hover, .blog-card:hover, .resource-card:hover {
-    transform: none;
-  }
 }
-
-/* ============================================
-   LANDSCAPE PHONES — keep hero readable
-   ============================================ */
-@media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
-  .hero-slide { min-height: 300px; aspect-ratio: auto; }
-  .hero-panel { padding: 16px 0 12px; }
-  .hero-panel-title { font-size: 1.4rem; }
-}
-
