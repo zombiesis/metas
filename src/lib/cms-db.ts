@@ -306,7 +306,8 @@ export async function getAllCMSContent() {
 }
 
 export async function readCMSCollection<T = unknown>(collection: CMSCollection): Promise<T> {
-  const sw = await scopedWhere();
+  let sw: Record<string, unknown> = {};
+  try { sw = await scopedWhere(); } catch {}
   switch (collection) {
     case 'site': return (await getSiteSettings()) as T;
     case 'homepage-sections': return (await getHomepageSections()) as T;
@@ -316,20 +317,20 @@ export async function readCMSCollection<T = unknown>(collection: CMSCollection):
     case 'notices': return (await getNotices()) as T;
     case 'documents': return (await getDocuments()) as T;
     case 'faculty': return (await getFaculty()) as T;
-    case 'media': return (await prisma.mediaAsset.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => readFallback('media', []))) as T;
-    case 'forms': return (await prisma.formSubmission.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => [])) as T;
-    case 'admissions': return (await prisma.admissionLead.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => [])) as T;
-    case 'recruiters': return (await prisma.recruiterInquiry.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => [])) as T;
-    case 'alumni': return (await prisma.alumniRegistration.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => [])) as T;
-    case 'contacts': return (await prisma.contactInquiry.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => [])) as T;
-    case 'events': return (await prisma.event.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => readFallback('events', []))) as T;
-    case 'blogs': return (await prisma.blogPost.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => readFallback('blogs', []))) as T;
-    case 'careers': return (await prisma.jobOpening.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 }).catch(() => readFallback('careers', []))) as T;
-    case 'users': return (await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, include: { role: true } }).catch(() => [])) as T;
-    case 'roles': return (await prisma.role.findMany({ orderBy: { name: 'asc' }, include: { permissions: { include: { permission: true } } } }).catch(() => [])) as T;
-    case 'audit-logs': return (await prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 500, include: { user: true } }).catch(() => [])) as T;
-    case 'security-events': return (await prisma.securityEvent.findMany({ orderBy: { createdAt: 'desc' }, take: 500, include: { user: true } }).catch(() => [])) as T;
-    case 'analytics-events': return (await prisma.analyticsEvent.findMany({ orderBy: { createdAt: 'desc' }, take: 1000 }).catch(() => [])) as T;
+    case 'media': try { return (await prisma.mediaAsset.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return (await readFallback('media', [])) as T; }
+    case 'forms': try { return (await prisma.formSubmission.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return [] as T; }
+    case 'admissions': try { return (await prisma.admissionLead.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return [] as T; }
+    case 'recruiters': try { return (await prisma.recruiterInquiry.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return [] as T; }
+    case 'alumni': try { return (await prisma.alumniRegistration.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return [] as T; }
+    case 'contacts': try { return (await prisma.contactInquiry.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return [] as T; }
+    case 'events': try { return (await prisma.event.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return (await readFallback('events', [])) as T; }
+    case 'blogs': try { return (await prisma.blogPost.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return (await readFallback('blogs', [])) as T; }
+    case 'careers': try { return (await prisma.jobOpening.findMany({ where: sw, orderBy: { createdAt: 'desc' }, take: 500 })) as T; } catch { return (await readFallback('careers', [])) as T; }
+    case 'users': try { return (await prisma.user.findMany({ orderBy: { createdAt: 'desc' }, include: { role: true } })) as T; } catch { return [] as T; }
+    case 'roles': try { return (await prisma.role.findMany({ orderBy: { name: 'asc' }, include: { permissions: { include: { permission: true } } } })) as T; } catch { return [] as T; }
+    case 'audit-logs': try { return (await prisma.auditLog.findMany({ orderBy: { createdAt: 'desc' }, take: 500, include: { user: true } })) as T; } catch { return [] as T; }
+    case 'security-events': try { return (await prisma.securityEvent.findMany({ orderBy: { createdAt: 'desc' }, take: 500, include: { user: true } })) as T; } catch { return [] as T; }
+    case 'analytics-events': try { return (await prisma.analyticsEvent.findMany({ orderBy: { createdAt: 'desc' }, take: 1000 })) as T; } catch { return [] as T; }
     default: throw new Error(`Unsupported collection ${collection}`);
   }
 }
