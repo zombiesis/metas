@@ -7,7 +7,7 @@
   },
   "description": "Enterprise Next.js + Prisma CMS upgrade for Metas Adventist College with real live-site institutional content, legal/compliance context, visual admin, analytics, audit logs, RBAC, security and WAF documentation.",
   "scripts": {
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate || true",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",

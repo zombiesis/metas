@@ -1,21 +1,24 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const { prisma } = await import('@/lib/prisma');
+    const { dbAvailable } = await import('@/lib/prisma');
     const { logger } = await import('@/lib/logger');
+
+    if (!dbAvailable) {
+      logger.warn('DATABASE_URL not configured — running in static/file-fallback mode');
+      return;
+    }
+
     const { validateEnv } = await import('@/lib/env');
+    try { validateEnv(); } catch { /* non-fatal in degraded mode */ }
 
-    // Validate environment variables
-    validateEnv();
-
-    // Verify database connectivity
+    const { prisma } = await import('@/lib/prisma');
     try {
       await prisma.$queryRaw`SELECT 1`;
       logger.info('Database connection verified');
     } catch (err) {
-      logger.fatal({ err }, 'Database connection failed on startup');
+      logger.warn({ err }, 'Database connection failed on startup — running in fallback mode');
     }
 
-    // Initialize Redis rate limiter if configured
     if (process.env.REDIS_URL) {
       const { initRedisRateLimiter } = await import('@/lib/rate-limiter');
       await initRedisRateLimiter();

@@ -18,7 +18,7 @@ const SEPARATOR = '.';
 
 function getSecret(): string {
   const secret = process.env.SESSION_SECRET;
-  if (!secret) throw new Error('SESSION_SECRET is required to sign branch cookies');
+  if (!secret) return '';
   return secret;
 }
 

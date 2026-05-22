@@ -37,7 +37,7 @@ export function validateEnv() {
 
   if (missing.length > 0) {
     logger.fatal({ missing }, 'Missing required environment variables');
-    process.exit(1);
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
 
   if (process.env.NODE_ENV === 'production') {
@@ -48,26 +48,26 @@ export function validateEnv() {
       const val = process.env[key] || '';
       if (PLACEHOLDER_VALUES.some((p) => val.includes(p))) {
         logger.fatal({ key }, `${key} contains a placeholder value. Set a real secret in production.`);
-        process.exit(1);
+        throw new Error(`${key} contains a placeholder value`);
       }
     }
     if ((process.env.SESSION_SECRET || '').length < MIN_SECRET_LENGTH) {
       logger.fatal(`SESSION_SECRET must be at least ${MIN_SECRET_LENGTH} characters in production`);
-      process.exit(1);
+      throw new Error('SESSION_SECRET too short');
     }
     if ((process.env.ENCRYPTION_KEY || '').length < MIN_SECRET_LENGTH) {
       logger.fatal(`ENCRYPTION_KEY must be at least ${MIN_SECRET_LENGTH} characters in production`);
-      process.exit(1);
+      throw new Error('ENCRYPTION_KEY too short');
     }
     // Trusted proxy must be explicit in production — without it, every request
     // shares an IP-rate-limit bucket of "0.0.0.0", trivially DoSing logins.
     if (!process.env.TRUST_PROXY) {
       logger.fatal('TRUST_PROXY is not set. Set TRUST_PROXY=cloudflare (or =nginx) so client IPs can be derived from headers.');
-      process.exit(1);
+      throw new Error('TRUST_PROXY not set');
     }
     if (missing.length > 0) {
       logger.fatal({ missing }, 'Missing required production environment variables');
-      process.exit(1);
+      throw new Error(`Missing production env vars: ${missing.join(', ')}`);
     }
   }
 
