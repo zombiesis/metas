@@ -4,6 +4,7 @@ import { sanitizeRichText } from '@/lib/security';
 import { HeroSlider } from '@/components/ImageSlider';
 import { CounterAnimation } from '@/components/CounterAnimation';
 import { TabNoticeBoard } from '@/components/TabNoticeBoard';
+import { safeFormatDate, pickEventDate } from '@/lib/utils';
 
 import { t, getServerLocale } from '@/lib/i18n';
 
@@ -165,7 +166,7 @@ export default async function Home() {
               const initials = f.name.split(' ').filter((_, i, a) => i === 0 || i === a.length - 1).map((w) => w[0]).join('');
               return (
                 <div className="faculty-card" key={f.slug || f.name}>
-                  {f.photo ? <img src={f.photo} alt={f.name} className="faculty-photo" /> : <div className="faculty-avatar">{initials}</div>}
+                  {f.photo ? <img src={f.photo} alt={f.name} className="faculty-photo" loading="lazy" decoding="async" /> : <div className="faculty-avatar">{initials}</div>}
                   <h3>{f.name}</h3>
                   <p className="faculty-role">{f.designation}</p>
                   <p className="faculty-dept">{f.department}</p>
@@ -190,13 +191,23 @@ export default async function Home() {
             <p className="eyebrow">Schedule</p>
             <h2>Upcoming Events</h2>
             <div className="timeline">
-              {events && events.filter((e: any) => new Date(e.date || e.createdAt) > new Date()).length > 0 ? (
+              {events && events.filter((e: any) => {
+                const d = pickEventDate(e);
+                if (!d) return false;
+                const dt = new Date(d as string);
+                return !Number.isNaN(dt.getTime()) && dt > new Date();
+              }).length > 0 ? (
                 events
-                  .filter((e: any) => new Date(e.date || e.createdAt) > new Date())
-                  .sort((a: any, b: any) => new Date(a.date || a.createdAt).getTime() - new Date(b.date || b.createdAt).getTime())
+                  .filter((e: any) => {
+                    const d = pickEventDate(e);
+                    if (!d) return false;
+                    const dt = new Date(d as string);
+                    return !Number.isNaN(dt.getTime()) && dt > new Date();
+                  })
+                  .sort((a: any, b: any) => new Date(pickEventDate(a) as string).getTime() - new Date(pickEventDate(b) as string).getTime())
                   .slice(0, 4)
                   .map((e: any) => {
-                    const d = new Date(e.date || e.createdAt);
+                    const d = new Date(pickEventDate(e) as string);
                     const mon = d.toLocaleDateString('en-IN', { month: 'short' }).toUpperCase();
                     const day = d.toLocaleDateString('en-IN', { day: '2-digit' });
                     const yr = d.getFullYear();
@@ -227,17 +238,20 @@ export default async function Home() {
             <p className="eyebrow">College Life</p>
             <h2>Events &amp; Achievements</h2>
             <div className="events-grid">
-              {events.slice(0, 3).map((e: any) => (
-                <article className="blog-card" key={e.id}>
-                  <img src={e.image || '/assets/images/campus-facility.webp'} alt={e.title} loading="lazy" />
-                  <div>
-                    <span className="blog-date">{new Date(e.date || e.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                    <h3>{e.title}</h3>
-                    <p>{e.summary || (e.body?.length > 100 ? e.body.substring(0, 100) + '...' : e.body) || ''}</p>
-                    <Link href={`/media/events/${e.slug || e.id}`}>Read More →</Link>
-                  </div>
-                </article>
-              ))}
+              {events.slice(0, 3).map((e: any) => {
+                const dateLabel = safeFormatDate(pickEventDate(e), 'long', '');
+                return (
+                  <article className="blog-card" key={e.id}>
+                    <img src={e.image || '/assets/images/campus-facility.webp'} alt={e.title} loading="lazy" />
+                    <div>
+                      {dateLabel && <span className="blog-date">{dateLabel}</span>}
+                      <h3>{e.title}</h3>
+                      <p>{e.summary || (e.body?.length > 100 ? e.body.substring(0, 100) + '...' : e.body) || ''}</p>
+                      <Link href={`/media/events/${e.slug || e.id}`}>Read More →</Link>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>

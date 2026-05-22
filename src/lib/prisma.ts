@@ -28,9 +28,8 @@ if (process.env.NODE_ENV !== 'production' && _prisma) {
 export const dbAvailable = _prisma !== null;
 
 /**
- * Prisma client instance. Typed as non-null for convenience in admin routes
- * (which are auth-gated and will 401 before reaching DB code when no DB exists).
- * Public code should check `dbAvailable` or use optional chaining.
+ * Prisma client instance. Typed as non-null for convenience in admin routes.
+ * Public code should check `dbAvailable` before using.
  */
 export const prisma = _prisma as PrismaClient;
 

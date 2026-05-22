@@ -3078,42 +3078,107 @@ label { font-size: .8rem !important; font-weight: 600 !important; letter-spacing
 
 
 /* ============================================
-   TARGETED MOBILE FIXES — issues from real device
+   MOBILE FIXES (kept minimal & targeted)
+   Fixes verified against real iPhone 13 screenshots.
    ============================================ */
 
-/* Fix 1: Inquiry form heading was invisible (navy text on navy bg).
-   Force white text since the bar background is navy. */
-.inquiry-form-wrap h3 {
-  color: #fff !important;
-}
+/* Inquiry form heading was invisible (navy text on navy bar). Force white. */
+.inquiry-form-wrap h3 { color: #fff !important; }
 
+/* Hero arrow buttons (48x48 touch targets, visible on all screens) */
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(10, 22, 40, 0.45);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, transform 0.2s;
+}
+.hero-arrow:hover { background: rgba(201, 149, 44, 0.85); transform: translateY(-50%) scale(1.05); }
+.hero-arrow:active { transform: translateY(-50%) scale(0.95); }
+.hero-arrow-prev { left: 16px; }
+.hero-arrow-next { right: 16px; }
+
+/* Sticky bottom CTA on mobile */
+.mobile-sticky-cta {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: none;
+  gap: 10px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 16px rgba(10, 22, 40, 0.08);
+  transform: translateY(110%);
+  transition: transform 0.25s ease;
+}
+.mobile-sticky-cta.visible { transform: translateY(0); }
+.mobile-sticky-cta-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold-gradient);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 14px;
+  border-radius: var(--radius-pill);
+  min-height: 48px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(201, 149, 44, 0.3);
+}
+.mobile-sticky-cta-btn:active { transform: scale(0.97); }
+.mobile-sticky-cta-call {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.mobile-sticky-cta-call:active { transform: scale(0.95); }
+
+/* Show sticky CTA + arrow buttons only on mobile */
 @media (max-width: 768px) {
-  /* Fix 2: Top bar overflow — wrap and shrink */
-  .top {
-    font-size: 0.7rem;
-    padding: 6px 0;
-  }
-  .top .wrap {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-  .top-left,
-  .top-right {
+  .mobile-sticky-cta { display: flex; }
+
+  /* Make sure footer leaves room for the sticky CTA when visible */
+  .footer { padding-bottom: 96px; }
+
+  /* Smaller arrows on mobile so they don't dominate */
+  .hero-arrow { width: 44px; height: 44px; }
+  .hero-arrow-prev { left: 8px; }
+  .hero-arrow-next { right: 8px; }
+
+  /* Top bar — stack & wrap so phone numbers don't overflow */
+  .top { font-size: 0.7rem; padding: 6px 0; }
+  .top .wrap { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .top-left, .top-right {
     flex-wrap: wrap;
     gap: 8px 12px;
     width: 100%;
   }
-  .top-left span,
-  .top-right span {
-    font-size: 0.7rem;
-  }
+  .top-left span, .top-right span { font-size: 0.7rem; }
 
-  /* Fix 3: Brand logo too big — shrink so CTA fits */
-  .nav {
-    padding: 0 12px;
-    gap: 8px;
-  }
+  /* Brand logo cap so CTA fits next to it */
+  .nav { padding: 0 12px; gap: 8px; }
   .brand img {
     height: 36px;
     max-width: 60vw;
@@ -3126,7 +3191,7 @@ label { font-size: .8rem !important; font-weight: 600 !important; letter-spacing
     flex-shrink: 0;
   }
 
-  /* Fix 4: Hero panel buttons overlapping — stack vertically full-width */
+  /* Hero panel — buttons stack, no more overlap */
   .hero-panel-inner {
     grid-template-columns: 1fr !important;
     gap: 14px;
@@ -3141,21 +3206,97 @@ label { font-size: .8rem !important; font-weight: 600 !important; letter-spacing
     justify-content: center;
     padding: 12px 16px;
     font-size: 0.85rem;
+    min-height: 48px;
   }
 
-  /* Fix 5: Slide counter positioning */
-  .hero-counter {
-    top: 14px;
-    right: 16px;
-    font-size: 0.85rem;
-  }
-  .hero-counter-current {
-    font-size: 1.3rem;
+  /* Slide counter sits in the corner */
+  .hero-counter { top: 14px; right: 16px; font-size: 0.85rem; }
+  .hero-counter-current { font-size: 1.3rem; }
+
+  /* Faculty cards: single column with image on top */
+  .faculty-grid { grid-template-columns: 1fr !important; gap: 16px; }
+  .faculty-card { padding: 18px 16px; }
+
+  /* Affiliations: 2 per row, centered */
+  .affil-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
+  .affil-card { padding: 14px 10px; }
+  .affil-card img { max-width: 60px; height: auto; }
+
+  /* Event cards: full-width with full-width "Read More" */
+  .events-grid { grid-template-columns: 1fr !important; gap: 18px; }
+  .blog-card a {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 10px 16px;
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-pill);
+    min-height: 44px;
+    line-height: 24px;
   }
 
-  /* Prevent global horizontal overflow */
-  html, body {
-    overflow-x: hidden;
-    max-width: 100vw;
+  /* Single column for all common multi-col grids */
+  .why-grid,
+  .course-grid,
+  .mvv-cards,
+  .cta-grid,
+  .notice-layout,
+  .home-notices-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Stats bar: 2x2 instead of 4x1 */
+  .stats-bar .wrap { grid-template-columns: repeat(2, 1fr); }
+  .stats-bar .wrap > * + * { border-left: none; }
+
+  /* Footer to single column */
+  .foot { grid-template-columns: 1fr !important; gap: 28px; }
+  .foot a, .foot p { word-break: break-word; }
+
+  /* Resource cards: 2 per row */
+  .resource-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .resource-card { min-width: 0; padding: 14px 10px; }
+
+  /* Tab Notice Board: scrollable tabs */
+  .tab-header {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-header::-webkit-scrollbar { display: none; }
+  .tab-header button { flex-shrink: 0; }
+
+  /* Touch-friendly: 44px min tap targets */
+  .btn { min-height: 44px; }
+
+  /* Prevent iOS zoom on focus by ensuring 16px+ inputs */
+  input, select, textarea { font-size: 16px !important; }
+}
+
+/* Prevent global horizontal overflow always */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+img, video, iframe { max-width: 100%; height: auto; }
+
+/* Small phones (≤480px) */
+@media (max-width: 480px) {
+  .affil-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .stats-bar .wrap { grid-template-columns: 1fr; }
+  .resource-row { grid-template-columns: 1fr !important; }
+  .nav-cta { padding: 6px 10px; font-size: 0.7rem; }
+  .brand img { height: 32px; }
+}
+
+/* Touch devices: disable hover transforms */
+@media (hover: none) and (pointer: coarse) {
+  .why-card:hover, .course-card:hover, .faculty-card:hover,
+  .affil-card:hover, .blog-card:hover, .resource-card:hover {
+    transform: none;
   }
 }
+

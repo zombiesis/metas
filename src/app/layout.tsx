@@ -16,6 +16,7 @@ import { CookieConsent } from '@/components/CookieConsent';
 import { ChatbotWidget } from '@/components/ChatbotWidget';
 import { AntiTamper } from '@/components/AntiTamper';
 import { Decoy } from '@/components/Decoy';
+import { MobileStickyCTA } from '@/components/MobileStickyCTA';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
@@ -23,6 +24,7 @@ const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfa
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 5,
 };
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -70,6 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <CookieConsent />
         <ChatbotWidget />
+        <MobileStickyCTA />
         <AntiTamper />
         <Decoy />
       </body>
