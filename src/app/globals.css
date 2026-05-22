@@ -3075,3 +3075,87 @@ label { font-size: .8rem !important; font-weight: 600 !important; letter-spacing
 .dark .branch-card-title h4 { color: #f1f5f9; }
 .dark .branch-card-stats strong { color: #f1f5f9; }
 .dark .branch-card-footer { border-color: #1e293b; }
+
+
+/* ============================================
+   TARGETED MOBILE FIXES — issues from real device
+   ============================================ */
+
+/* Fix 1: Inquiry form heading was invisible (navy text on navy bg).
+   Force white text since the bar background is navy. */
+.inquiry-form-wrap h3 {
+  color: #fff !important;
+}
+
+@media (max-width: 768px) {
+  /* Fix 2: Top bar overflow — wrap and shrink */
+  .top {
+    font-size: 0.7rem;
+    padding: 6px 0;
+  }
+  .top .wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .top-left,
+  .top-right {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    width: 100%;
+  }
+  .top-left span,
+  .top-right span {
+    font-size: 0.7rem;
+  }
+
+  /* Fix 3: Brand logo too big — shrink so CTA fits */
+  .nav {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .brand img {
+    height: 36px;
+    max-width: 60vw;
+    object-fit: contain;
+    object-position: left center;
+  }
+  .nav-cta {
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    flex-shrink: 0;
+  }
+
+  /* Fix 4: Hero panel buttons overlapping — stack vertically full-width */
+  .hero-panel-inner {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+  .hero-panel-actions {
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .hero-panel-actions .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+
+  /* Fix 5: Slide counter positioning */
+  .hero-counter {
+    top: 14px;
+    right: 16px;
+    font-size: 0.85rem;
+  }
+  .hero-counter-current {
+    font-size: 1.3rem;
+  }
+
+  /* Prevent global horizontal overflow */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+}
