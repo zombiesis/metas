@@ -185,7 +185,7 @@ export function middleware(request: NextRequest) {
   // route handlers so layout.tsx can attach it to inline <script> tags.
   // Without this propagation, the inline scripts would be blocked because the
   // CSP allows scripts only from `'self'` or matching the nonce.
-  const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  const nonce = btoa(crypto.randomUUID());
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-csp-nonce', nonce);
 
