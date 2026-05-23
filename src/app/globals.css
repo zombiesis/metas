@@ -883,8 +883,6 @@ textarea { min-height: 120px; resize: vertical; }
   .notice-layout { grid-template-columns: 1fr !important; }
   /* 4. Hide Platforms & Resources section */
   .section-resources { display: none; }
-  /* 5. Tighter section padding */
-  .section { padding: 28px 0; }
   .section h2 { margin-bottom: 28px; }
   .grid.two, .grid.three, .grid.four, .programgrid, .stats, .twocol, .formgrid, .filters, .doc {
     grid-template-columns: 1fr;
