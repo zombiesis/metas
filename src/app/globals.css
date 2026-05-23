@@ -1240,7 +1240,23 @@ textarea { min-height: 120px; resize: vertical; }
 @media (max-width: 768px) {
   .why-grid { grid-template-columns: 1fr; gap: 16px; }
   .course-grid { grid-template-columns: 1fr; }
-  .faculty-grid { grid-template-columns: 1fr; }
+  /* Faculty: horizontal scroll row instead of 7-card vertical stack */
+  .faculty-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .faculty-grid::-webkit-scrollbar { display: none; }
+  .faculty-grid .faculty-card {
+    flex: 0 0 160px;
+    width: 160px;
+    scroll-snap-align: start;
+  }
   .affil-grid { grid-template-columns: 1fr; }
   .events-grid { grid-template-columns: 1fr; }
   .mvv-cards { grid-template-columns: 1fr; }
@@ -3395,9 +3411,8 @@ label { font-size: .8rem !important; font-weight: 600 !important; letter-spacing
   .hero-counter { top: 14px; right: 16px; font-size: 0.85rem; }
   .hero-counter-current { font-size: 1.3rem; }
 
-  /* Faculty cards: single column with image on top */
-  .faculty-grid { grid-template-columns: 1fr !important; gap: 16px; }
-  .faculty-card { padding: 18px 16px; }
+  /* Faculty: horizontal scroll handled above */
+  .faculty-card { padding: 16px 12px; }
 
   /* Affiliations: 2 per row, centered */
   .affil-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
