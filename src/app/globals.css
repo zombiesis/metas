@@ -869,7 +869,7 @@ textarea { min-height: 120px; resize: vertical; }
   }
   .nav-overlay.open { opacity: 1; pointer-events: auto; }
   .menu-toggle { display: flex; position: relative; z-index: 1002; }
-  .brand img { height: 40px; }
+  .brand img { height: 40px; max-width: 160px; object-fit: contain; }
   .hero { min-height: 70vh; }
   .hero h1 { font-size: clamp(2.2rem, 8vw, 3.5rem); }
   .section { padding: 40px 0; }
@@ -939,7 +939,7 @@ textarea { min-height: 120px; resize: vertical; }
   transition: box-shadow var(--transition), transform var(--transition);
 }
 .course-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-6px); }
-.course-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; transition: transform 0.5s ease; }
+.course-card img { width: 100%; height: 200px; object-fit: cover; display: block; transition: transform 0.5s ease; }
 .course-card:hover img { transform: scale(1.05); }
 .course-card-body { padding: 20px 22px 22px; }
 .course-card-body h3 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
@@ -2170,7 +2170,7 @@ small{color:var(--muted);font-weight:400;font-size:.76rem}
   transition: all var(--transition);
 }
 .course-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-6px); }
-.course-card img { width: 100%; height: 180px; object-fit: cover; transition: transform var(--transition); }
+.course-card img { width: 100%; height: 200px; object-fit: cover; transition: transform var(--transition); }
 .course-card:hover img { transform: scale(1.05); }
 .course-card-body { padding: 20px; }
 .course-card-body h3 { font-family: Georgia, serif; font-size: 1.2rem; margin-bottom: 8px; }
@@ -2537,7 +2537,7 @@ small{color:var(--muted);font-weight:400;font-size:.76rem}
 .events-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .blog-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: all var(--transition); }
 .blog-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
-.blog-card img { width: 100%; height: 160px; object-fit: cover; }
+.blog-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
 .blog-card > div { padding: 20px; }
 .blog-date { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
 .blog-card h3 { font-size: 1rem; font-weight: 700; color: var(--navy); margin: 6px 0 8px; }

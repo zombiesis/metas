@@ -75,6 +75,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         {theme.favicon && <link rel="icon" href={theme.favicon} />}
         <link rel="manifest" href="/manifest.json" />
+        {/* FIX: Preload hero image so it renders immediately on mobile */}
+        <link rel="preload" as="image" href="/assets/images/campus-hero.webp" fetchPriority="high" />
         <meta name="theme-color" content={theme.primaryColor} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

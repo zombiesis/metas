@@ -129,7 +129,7 @@ export default async function Home() {
           <div className="course-grid">
             {mainPrograms.map((p) => (
               <article className="course-card" key={p.slug}>
-                <img src={p.image || '/assets/images/campus-life.webp'} alt={p.title} loading="lazy" />
+                <img src={p.image || '/assets/images/campus-life.webp'} alt={p.title} loading="lazy" width={400} height={200} style={{width:'100%',height:'200px',objectFit:'cover'}} />
                 <div className="course-card-body">
                   <h3><Link href={`/academics/${p.slug}`}>{p.title}</Link></h3>
                   <p className="course-meta">{p.duration} &middot; {p.slug === 'gnm' ? 'GNC / VNSGU' : 'GTU / AICTE'}</p>
@@ -254,7 +254,7 @@ export default async function Home() {
                 const dateLabel = safeFormatDate(pickEventDate(e), 'long', '');
                 return (
                   <article className="blog-card" key={e.id}>
-                    <img src={e.image || '/assets/images/campus-facility.webp'} alt={e.title} loading="lazy" />
+                    <img src={e.image || '/assets/images/campus-facility.webp'} alt={e.title} loading="lazy" width={400} height={160} style={{width:'100%',height:'160px',objectFit:'cover'}} />
                     <div>
                       {dateLabel && <span className="blog-date">{dateLabel}</span>}
                       <h3>{e.title}</h3>
