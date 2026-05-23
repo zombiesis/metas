@@ -18,6 +18,7 @@ import { AntiTamper } from '@/components/AntiTamper';
 import { Decoy } from '@/components/Decoy';
 import { MobileStickyCTA } from '@/components/MobileStickyCTA';
 import { BackToTop } from '@/components/BackToTop';
+import { InquiryDrawer } from '@/components/InquiryDrawer';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
@@ -96,6 +97,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ChatbotWidget />
         <MobileStickyCTA />
         <BackToTop />
+        <InquiryDrawer />
         <AntiTamper />
         <Decoy />
       </body>
