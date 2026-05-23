@@ -63,7 +63,17 @@ export default async function Home() {
             <p className="eyebrow">Welcome to Metas Adventist College</p>
             <h2>{welcome.title || 'A Legacy of Excellence Since 1998'}</h2>
             <div className="about-body">
-              {welcome.body ? <div dangerouslySetInnerHTML={{ __html: sanitizeRichText(welcome.body) }} /> : <><p>The Metas Group of Institutions is part of the vast array of Educational and Medical institutions run by the Seventh Day Adventist Organisation. Worldwide they operate <strong>5,590 educational establishments</strong> including 114 universities and colleges. The operations of Surat are managed by Medical Educational Trust Association Surat of Seventh-day Adventist. Metas Adventist Hospital and Metas Adventist School have been in operation since 1923 &amp; 1942 respectively.</p></>}
+              {welcome.body ? <div dangerouslySetInnerHTML={{ __html: sanitizeRichText(welcome.body) }} /> : <>
+                {/* FIX #9: Scannable chunks instead of wall of text */}
+                <p>The Metas Group of Institutions is part of the vast array of Educational and Medical institutions run by the <strong>Seventh Day Adventist Organisation</strong>.</p>
+                <ul className="about-highlights">
+                  <li>Established <strong>1998</strong> in Athwalines, Surat</li>
+                  <li>Part of a global network operating <strong>5,590 educational establishments</strong> including 114 universities</li>
+                  <li>Metas Adventist Hospital &amp; School in operation since <strong>1923 &amp; 1942</strong></li>
+                  <li>Self-financing institution on its own campus</li>
+                </ul>
+                <p>Operations in Surat are managed by Medical Educational Trust Association Surat of Seventh-day Adventist (METAS).</p>
+              </>}
             </div>
             <div className="mvv-cards">
               <div className="mvv-card"><h3>Our Mission</h3><p>&ldquo;{site.mission}&rdquo;</p></div>
@@ -163,10 +173,12 @@ export default async function Home() {
           <h2>Meet the Faculty</h2>
           <div className="faculty-grid">
             {topFaculty.map((f) => {
-              const initials = f.name.split(' ').filter((_, i, a) => i === 0 || i === a.length - 1).map((w) => w[0]).join('');
+              const initials = f.name.split(' ').filter((_: string, i: number, a: string[]) => i === 0 || i === a.length - 1).map((w: string) => w[0]).join('');
+              /* FIX #3: Never show classroom/event photos as portraits */
+              const hasRealPhoto = f.photo && !/campus|classroom|facility|ceremony|event|hero/i.test(f.photo);
               return (
                 <div className="faculty-card" key={f.slug || f.name}>
-                  {f.photo ? <img src={f.photo} alt={f.name} className="faculty-photo" loading="lazy" decoding="async" /> : <div className="faculty-avatar">{initials}</div>}
+                  {hasRealPhoto ? <img src={f.photo} alt={f.name} className="faculty-photo" loading="lazy" decoding="async" /> : <div className="faculty-avatar">{initials}</div>}
                   <h3>{f.name}</h3>
                   <p className="faculty-role">{f.designation}</p>
                   <p className="faculty-dept">{f.department}</p>

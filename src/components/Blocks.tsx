@@ -86,7 +86,7 @@ export function FacultyGrid({ faculty, limit }: { faculty: FacultyMember[]; limi
           .join('')
           .toUpperCase()
           .slice(0, 2);
-        const hasPhoto = m.photo && !m.photo.includes('campus-life') && !m.photo.includes('classroom');
+        const hasPhoto = m.photo && !/campus|classroom|facility|ceremony|event|hero/i.test(m.photo);
         return (
           <article className="card" key={m.slug || m.name}>
             {hasPhoto ? (

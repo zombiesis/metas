@@ -19,8 +19,19 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [showHint, setShowHint] = useState(false);
   const touchStart = useRef<number | null>(null);
   const DURATION = 6000;
+
+  // FIX #4: Show swipe hint on first visit, auto-hide after 3s
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!sessionStorage.getItem('hero-swiped')) {
+      setShowHint(true);
+      const t = setTimeout(() => setShowHint(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, []);
 
   const goTo = useCallback((idx: number) => {
     const n = slides.length;
@@ -72,6 +83,8 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
     const diff = e.changedTouches[0].clientX - touchStart.current;
     touchStart.current = null;
     if (Math.abs(diff) < 50) return;
+    setShowHint(false);
+    sessionStorage.setItem('hero-swiped', '1');
     if (diff < 0) next();
     else prev();
   };
@@ -166,6 +179,9 @@ export function HeroSlider({ slides }: { slides: Slide[] }) {
       <div className="hero-progress-track">
         <div className="hero-progress-bar" style={{ width: `${progress}%` }} />
       </div>
+
+      {/* FIX #4: Swipe hint on first visit */}
+      {showHint && <div className="hero-swipe-hint">← Swipe to explore →</div>}
     </section>
   );
 }

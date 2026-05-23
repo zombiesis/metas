@@ -20,6 +20,7 @@ export default async function Admissions() {
   const admissions = pages.admissions || {};
   return (
     <>
+      <Breadcrumbs items={[{ label: 'Admissions', href: '/admissions' }]} />
       <section className="pagehero"><div className="wrap"><p className="eyebrow">Admissions 2026-27</p><h1>{admissions.title || 'Apply with clarity.'}</h1><p>{admissions.summary || 'Secure, mobile-first admission pathways for verified programs.'}</p></div></section>
       <Section eyebrow="Admissions context" title="Official links and policy-backed admission guidance"><article className="card"><RichContent html={admissions.body} /><SourceLinks urls={admissions.sourceUrls} /><div className="actions"><Link className="btn gold" href="/admissions/apply">Apply Online</Link><a className="btn outline" href={admissions.quickGuideUrl || '#'} target="_blank" rel="noreferrer">Quick Guide</a></div></article></Section>
       <Section eyebrow="Enquiry" title="Student-first admissions form"><AdmissionsForm programs={programs} /></Section>

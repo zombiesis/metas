@@ -62,9 +62,11 @@
 }
 
 /* ===== BASE ===== */
-* { box-sizing: border-box; margin: 0; }
+* { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
 
 html { scroll-behavior: smooth; }
+/* FIX: Global mobile baseline — prevent horizontal overflow */
+html, body { overflow-x: hidden; max-width: 100vw; }
 
 body {
   background: var(--ivory);
@@ -76,13 +78,16 @@ body {
   overflow-x: hidden;
 }
 
-a { text-decoration: none; color: inherit; transition: color var(--transition); }
-img { max-width: 100%; display: block; }
+a { text-decoration: none; color: inherit; transition: color var(--transition); touch-action: manipulation; }
+img { max-width: 100%; height: auto; display: block; }
+/* FIX: Ensure minimum tap targets on mobile */
+a, button { touch-action: manipulation; }
 
 .wrap { width: min(1200px, calc(100% - 48px)); margin: auto; }
 
 /* Skip link */
-.skip { position: absolute; left: 10px; top: -60px; background: var(--gold); padding: 10px 16px; z-index: 1000; border-radius: 6px; font-weight: 700; color: #fff; }
+/* Skip link — FIX #14 */
+.skip { position: absolute; left: 10px; top: -60px; background: var(--gold); padding: 10px 16px; z-index: 10000; border-radius: 6px; font-weight: 700; color: #fff; transition: top 0.3s ease; }
 .skip:focus { top: 10px; }
 
 /* Page load animation */
@@ -233,15 +238,19 @@ main > *:nth-child(4) { animation-delay: 0.2s; }
 }
 
 
-/* Mobile menu toggle */
+/* Mobile menu toggle — FIX #1: 48x48 touch target */
 .menu-toggle {
   display: none;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: 12px;
   border-radius: 8px;
   transition: background var(--transition);
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
 }
 .menu-toggle:hover { background: var(--section-alt); }
 .menu-toggle span {
@@ -427,6 +436,24 @@ main > *:nth-child(4) { animation-delay: 0.2s; }
   transition: width 0.1s linear;
 }
 
+/* FIX #4: Swipe hint */
+.hero-swipe-hint {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 22, 40, 0.7);
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 10;
+  animation: fadeIn 0.5s ease, fadeOut 0.5s 2.5s ease forwards;
+  pointer-events: none;
+}
+@keyframes fadeOut { to { opacity: 0; } }
+
 /* Keep old .hero for the static page hero blocks (pagehero etc) */
 .hero {
   min-height: 85vh;
@@ -463,9 +490,23 @@ main > *:nth-child(4) { animation-delay: 0.2s; }
 @media (max-width: 768px) {
   .hero-counter { top: 16px; right: 20px; }
   .hero-counter-current { font-size: 1.4rem; }
-  .hero-panel-inner { grid-template-columns: 1fr; gap: 16px; }
-  .hero-panel-actions { flex-direction: row; flex-wrap: wrap; }
-  .hero-panel-title { font-size: clamp(1.6rem, 7vw, 2.5rem); }
+  /* FIX: Consolidate panel layout — single column, stacked buttons */
+  .hero-panel { padding: 28px 0 20px; }
+  .hero-panel-inner { grid-template-columns: 1fr !important; gap: 12px; }
+  .hero-panel-title { font-size: clamp(1.3rem, 6vw, 2rem); margin-bottom: 6px; }
+  .hero-panel-sub { font-size: 0.88rem; line-height: 1.5; max-width: 100%; }
+  .hero-panel-eyebrow { font-size: 0.7rem; margin-bottom: 4px; }
+  .hero-panel-actions { flex-direction: row !important; flex-wrap: wrap; gap: 8px; width: 100%; }
+  .hero-panel-actions .btn { flex: 1; min-width: 120px; padding: 10px 12px; font-size: 0.82rem; min-height: 44px; }
+  /* FIX: iOS 100vh includes browser chrome — use svh with vh fallback */
+  .hero-slider { height: 100vh; height: 100svh; min-height: 480px; }
+  /* Arrows: smaller, lower so they don't overlap text */
+  .hero-arrow { width: 40px; height: 40px; }
+  .hero-arrow-prev { left: 8px; }
+  .hero-arrow-next { right: 8px; }
+  /* Dots: bigger tap targets */
+  .hero-dot { width: 10px; height: 10px; }
+  .hero-dot.active { width: 24px; }
 }
 
 
@@ -558,6 +599,20 @@ main > *:nth-child(4) { animation-delay: 0.2s; }
   transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
 }
 .card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); border-color: rgba(184, 134, 11, 0.2); }
+
+/* FIX #10: Clickable phone/email links with proper tap targets */
+.card a[href^="tel:"],
+.card a[href^="mailto:"] {
+  color: #2563EB;
+  text-decoration: underline;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  gap: 6px;
+}
+.card a[href^="tel:"]:hover,
+.card a[href^="mailto:"]:hover { color: var(--gold); }
 .card h3 {
   font-family: var(--font-display);
   font-size: 1.25rem;
@@ -786,30 +841,34 @@ textarea { min-height: 120px; resize: vertical; }
   .nav-cta { display: none; }
   .nav nav {
     position: fixed;
-    top: 64px;
-    right: -100%;
+    top: 0;
+    right: 0;
     bottom: 0;
-    width: 320px;
-    max-width: 80vw;
+    width: 300px;
+    max-width: 85vw;
     background: #fff;
     flex-direction: column;
-    padding: 24px;
-    box-shadow: -10px 0 30px rgba(10,22,40,0.1);
-    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 99;
+    padding: 80px 24px 24px;
+    box-shadow: -10px 0 30px rgba(10,22,40,0.15);
+    /* FIX: GPU-accelerated transform instead of right positioning */
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1001;
     overflow-y: auto;
     display: flex;
-    gap: 8px;
+    gap: 4px;
+    /* Prevent inner scroll from propagating */
+    overscroll-behavior: contain;
   }
-  .nav nav.open { right: 0; }
+  .nav nav.open { transform: translateX(0); }
   .nav nav a { padding: 12px 16px; width: 100%; border-radius: 8px; }
   .nav-overlay {
-    position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background: rgba(10,22,40,0.4);
-    backdrop-filter: blur(4px); z-index: 98; opacity: 0; pointer-events: none;
+    position: fixed; inset: 0; background: rgba(10,22,40,0.5);
+    backdrop-filter: blur(4px); z-index: 1000; opacity: 0; pointer-events: none;
     transition: opacity 0.3s ease;
   }
   .nav-overlay.open { opacity: 1; pointer-events: auto; }
-  .menu-toggle { display: block; position: relative; z-index: 100; }
+  .menu-toggle { display: flex; position: relative; z-index: 1002; }
   .brand img { height: 40px; }
   .hero { min-height: 70vh; }
   .hero h1 { font-size: clamp(2.2rem, 8vw, 3.5rem); }
@@ -826,12 +885,6 @@ textarea { min-height: 120px; resize: vertical; }
   .top .wrap { flex-direction: column; gap: 8px; font-size: 0.75rem; justify-content: center; padding: 6px 0; }
   .top-left, .top-right { gap: 12px; justify-content: center; }
   .top-right span { display: none; }
-  .hero-counter { top: 16px; right: 20px; }
-  .hero-counter-current { font-size: 1.4rem; }
-  .hero-panel-inner { grid-template-columns: 1fr; gap: 16px; }
-  .hero-panel-actions { flex-direction: column; width: 100%; gap: 10px; margin-bottom: 12px; }
-  .hero-panel-actions .btn { width: 100%; }
-  .hero-panel-title { font-size: clamp(1.6rem, 7vw, 2.5rem); }
 }
 
 
@@ -1097,7 +1150,6 @@ textarea { min-height: 120px; resize: vertical; }
   .stats-bar { padding: 48px 0; }
   .stats-bar .wrap { grid-template-columns: 1fr; }
   .ticker-label { font-size: 0.65rem; padding: 4px 10px; }
-  .hero-panel-actions .btn { width: 100%; }
   .timeline-item { grid-template-columns: 50px 1fr; gap: 12px; }
 }
 
@@ -2261,7 +2313,7 @@ small{color:var(--muted);font-weight:400;font-size:.76rem}
 }
 @media (max-width: 768px) {
   .hero-slide h1 { font-size: clamp(2rem, 7vw, 3rem); }
-  .hero-slider { height: 60vh; min-height: 400px; }
+  /* hero-slider height handled in the main mobile block above */
   .mvv-grid, .why-grid, .course-grid, .testimonial-grid { grid-template-columns: 1fr; }
   .counter-section .wrap { grid-template-columns: 1fr; }
   .affiliation-slider { grid-template-columns: 1fr; }
@@ -2401,6 +2453,29 @@ small{color:var(--muted);font-weight:400;font-size:.76rem}
 /* About grid */
 .about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: start; }
 .about-body p { font-size: 1.05rem; line-height: 1.8; color: var(--muted); }
+
+/* FIX #9: Scannable bullet list for welcome section */
+.about-highlights {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+  display: grid;
+  gap: 10px;
+}
+.about-highlights li {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--muted);
+  padding-left: 24px;
+  position: relative;
+}
+.about-highlights li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 700;
+}
 .mvv-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
 .mvv-cards .mvv-card { background: var(--section-alt); border-radius: var(--radius); padding: 20px; }
 .mvv-cards .mvv-card h3 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--navy); margin-bottom: 8px; }
@@ -2470,7 +2545,7 @@ small{color:var(--muted);font-weight:400;font-size:.76rem}
 .blog-card a { font-size: 0.85rem; font-weight: 700; color: var(--gold); }
 
 /* Affiliation grid */
-.affil-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; }
+.affil-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; overflow: hidden; }
 .affil-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; display: grid; gap: 6px; place-items: center; transition: all var(--transition); }
 .affil-card:hover { border-color: var(--gold); box-shadow: var(--shadow-sm); }
 .affil-card img { width: 44px; height: 44px; object-fit: contain; }
@@ -3191,11 +3266,6 @@ label { font-size: .8rem !important; font-weight: 600 !important; letter-spacing
   /* Make sure footer leaves room for the sticky CTA when visible */
   .footer { padding-bottom: 96px; }
 
-  /* Smaller arrows on mobile so they don't dominate */
-  .hero-arrow { width: 44px; height: 44px; }
-  .hero-arrow-prev { left: 8px; }
-  .hero-arrow-next { right: 8px; }
-
   /* Top bar — stack & wrap so phone numbers don't overflow */
   .top { font-size: 0.7rem; padding: 6px 0; }
   .top .wrap { flex-direction: column; align-items: flex-start; gap: 4px; }
@@ -3220,23 +3290,7 @@ label { font-size: .8rem !important; font-weight: 600 !important; letter-spacing
     flex-shrink: 0;
   }
 
-  /* Hero panel — buttons stack, no more overlap */
-  .hero-panel-inner {
-    grid-template-columns: 1fr !important;
-    gap: 14px;
-  }
-  .hero-panel-actions {
-    flex-direction: column !important;
-    align-items: stretch;
-    gap: 10px;
-  }
-  .hero-panel-actions .btn {
-    width: 100%;
-    justify-content: center;
-    padding: 12px 16px;
-    font-size: 0.85rem;
-    min-height: 48px;
-  }
+  /* Hero panel — handled in the consolidated mobile block above */
 
   /* Slide counter sits in the corner */
   .hero-counter { top: 14px; right: 16px; font-size: 0.85rem; }

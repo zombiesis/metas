@@ -1,4 +1,5 @@
 import { RichContent, SourceLinks } from '@/components/Blocks';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { readCMSCollection, type SiteSettings } from '@/lib/cms-file';
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +21,7 @@ export default async function Placements() {
   const reps = Array.isArray(placement.studentRepresentatives) ? placement.studentRepresentatives : [];
   return (
     <>
+      <Breadcrumbs items={[{ label: 'Placements', href: '/placements' }]} />
       <section className="pagehero"><div className="wrap"><p className="eyebrow">Placements</p><h1>{placement.title || 'Placement Cell & Recruiter Engagement'}</h1><p>{placement.summary}</p></div></section>
       <section className="section">
         <div className="wrap twocol">
