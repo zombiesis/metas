@@ -782,7 +782,7 @@ textarea { min-height: 120px; resize: vertical; }
 }
 
 @media (max-width: 768px) {
-  .nav { padding: 0 16px; height: 64px; gap: 12px; justify-content: space-between; }
+  .nav { padding: 0 16px; height: 64px; gap: 12px; justify-content: space-between; backdrop-filter: none; background: rgba(255, 255, 255, 0.98); }
   .nav-cta { display: none; }
   .nav nav {
     position: fixed;
@@ -823,7 +823,15 @@ textarea { min-height: 120px; resize: vertical; }
   .foot { grid-template-columns: 1fr; gap: 32px; }
   .notices .wrap { grid-template-columns: 1fr; }
   .wrap { width: calc(100% - 32px); }
-  .top .wrap { gap: 12px; font-size: 0.75rem; justify-content: center; }
+  .top .wrap { flex-direction: column; gap: 8px; font-size: 0.75rem; justify-content: center; padding: 6px 0; }
+  .top-left, .top-right { gap: 12px; justify-content: center; }
+  .top-right span { display: none; }
+  .hero-counter { top: 16px; right: 20px; }
+  .hero-counter-current { font-size: 1.4rem; }
+  .hero-panel-inner { grid-template-columns: 1fr; gap: 16px; }
+  .hero-panel-actions { flex-direction: column; width: 100%; gap: 10px; margin-bottom: 12px; }
+  .hero-panel-actions .btn { width: 100%; }
+  .hero-panel-title { font-size: clamp(1.6rem, 7vw, 2.5rem); }
 }
 
 
