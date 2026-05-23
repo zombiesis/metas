@@ -873,6 +873,18 @@ textarea { min-height: 120px; resize: vertical; }
   .hero { min-height: 70vh; }
   .hero h1 { font-size: clamp(2.2rem, 8vw, 3.5rem); }
   .section { padding: 40px 0; }
+
+  /* ── Mobile homepage trimming ── */
+  /* 1. Hide Mission/Vision/Values cards */
+  .mvv-cards { display: none; }
+  /* 2. Hide Upcoming Events aside */
+  .notice-layout aside { display: none; }
+  /* 3. Notice layout full width */
+  .notice-layout { grid-template-columns: 1fr !important; }
+  /* 4. Hide Platforms & Resources section */
+  .section-resources { display: none; }
+  /* 5. Tighter section padding */
+  .section { padding: 28px 0; }
   .section h2 { margin-bottom: 28px; }
   .grid.two, .grid.three, .grid.four, .programgrid, .stats, .twocol, .formgrid, .filters, .doc {
     grid-template-columns: 1fr;

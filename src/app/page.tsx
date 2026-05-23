@@ -142,7 +142,7 @@ export default async function Home() {
       </section>
 
       {/* ─── 5. STUDENT RESOURCES ─── */}
-      <section className="section alt">
+      <section className="section alt section-resources">
         <div className="wrap">
           <p className="eyebrow">Learning Platforms</p>
           <h2>Platforms &amp; Resources for Students</h2>
