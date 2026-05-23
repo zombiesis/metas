@@ -1021,8 +1021,10 @@ textarea { min-height: 120px; resize: vertical; }
 .inquiry-whatsapp a { color: #25D366; font-weight: 700; }
 
 /* ===== INQUIRY DRAWER (mobile pull-out) ===== */
-/* Tab hidden on desktop */
-.inquiry-tab { display: none; }
+/* Everything hidden on desktop */
+.inquiry-tab,
+.inquiry-drawer,
+.inquiry-overlay { display: none; }
 
 @media (max-width: 768px) {
   /* Hide the inline form on mobile */
@@ -1059,6 +1061,7 @@ textarea { min-height: 120px; resize: vertical; }
 
   /* Overlay */
   .inquiry-overlay {
+    display: block;
     position: fixed;
     inset: 0;
     background: rgba(10,22,40,0.5);
@@ -1068,6 +1071,7 @@ textarea { min-height: 120px; resize: vertical; }
 
   /* Drawer panel */
   .inquiry-drawer {
+    display: block;
     position: fixed;
     top: 0;
     left: 0;
