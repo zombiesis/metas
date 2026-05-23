@@ -1,8 +1,16 @@
 import Link from 'next/link';
 import { DetailList, RichContent, SourceLinks } from '@/components/Blocks';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { readCMSCollection, type SiteSettings } from '@/lib/cms-file';
 
 export const dynamic = 'force-dynamic';
+
+// FIX #11: Unique page metadata
+export const metadata = {
+  title: 'About Us',
+  description: 'Metas Adventist College, Surat — values-based education since 1998, part of the global Seventh-day Adventist educational network.',
+  alternates: { canonical: '/about' },
+};
 
 export default async function About() {
   const [pages, site] = await Promise.all([
@@ -14,6 +22,7 @@ export default async function About() {
   const legal = site.legalIdentity || {};
   return (
     <>
+      <Breadcrumbs items={[{ label: 'About', href: '/about' }]} />
       <section className="pagehero"><div className="wrap"><p className="eyebrow">Institutional identity</p><h1>{about.title || 'About Metas Adventist College'}</h1><p>{about.summary}</p></div></section>
       <section className="section"><div className="wrap twocol"><div>
         <RichContent html={about.body} />

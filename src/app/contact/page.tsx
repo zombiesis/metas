@@ -1,7 +1,15 @@
 import { ContactCards, DetailList, RichContent, SourceLinks } from '@/components/Blocks';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { readCMSCollection, type SiteSettings } from '@/lib/cms-file';
 
 export const dynamic = 'force-dynamic';
+
+// FIX #11: unique title for SEO
+export const metadata = {
+  title: 'Contact & Admissions',
+  description: 'Get in touch with Metas Adventist College, Surat. Phone, email and inquiry form for admissions, placements and general queries.',
+  alternates: { canonical: '/contact' },
+};
 
 export default async function Contact() {
   const [site, pages] = await Promise.all([
@@ -12,6 +20,7 @@ export default async function Contact() {
   const principal = site.principal || {};
   return (
     <>
+      <Breadcrumbs items={[{ label: 'Contact', href: '/contact' }]} />
       <section className="pagehero"><div className="wrap"><p className="eyebrow">Contact</p><h1>{page.title || 'Reach Metas Adventist College'}</h1><p>{site.address}</p></div></section>
       <section className="section">
         <div className="wrap twocol">

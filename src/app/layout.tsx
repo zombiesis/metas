@@ -17,6 +17,7 @@ import { ChatbotWidget } from '@/components/ChatbotWidget';
 import { AntiTamper } from '@/components/AntiTamper';
 import { Decoy } from '@/components/Decoy';
 import { MobileStickyCTA } from '@/components/MobileStickyCTA';
+import { BackToTop } from '@/components/BackToTop';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair', display: 'swap' });
@@ -38,8 +39,27 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: { default: `${branchName}, Surat | ${tagline}`, template: `%s | ${branchName}` },
     description: `${tagline} — academic excellence, professional growth, service, and leadership in Athwalines, Surat.`,
-    openGraph: { type: 'website', siteName: branchName, title: `${branchName} | ${tagline}`, description: `${tagline} — academic excellence, professional growth, service, and leadership.` },
-    twitter: { card: 'summary_large_image', title: branchName, description: tagline },
+    openGraph: {
+      type: 'website',
+      siteName: branchName,
+      title: `${branchName} | ${tagline}`,
+      description: `${tagline} — academic excellence, professional growth, service, and leadership.`,
+      locale: 'en_IN',
+      images: [
+        {
+          url: '/assets/images/campus-hero.webp',
+          width: 1200,
+          height: 630,
+          alt: `${branchName}, Surat`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: branchName,
+      description: tagline,
+      images: ['/assets/images/campus-hero.webp'],
+    },
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   };
 }
@@ -73,6 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <CookieConsent />
         <ChatbotWidget />
         <MobileStickyCTA />
+        <BackToTop />
         <AntiTamper />
         <Decoy />
       </body>

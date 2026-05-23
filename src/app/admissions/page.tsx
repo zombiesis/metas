@@ -1,8 +1,16 @@
 import Link from 'next/link';
 import { AdmissionsForm, RichContent, Section, SourceLinks } from '@/components/Blocks';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { readCMSCollection, type Program } from '@/lib/cms-file';
 
 export const dynamic = 'force-dynamic';
+
+// FIX #11
+export const metadata = {
+  title: 'Admissions',
+  description: 'Apply to MBA, BBA, BCA, B.Sc. Nursing or GNM programs at Metas Adventist College, Surat. Eligibility, process and contact details.',
+  alternates: { canonical: '/admissions' },
+};
 
 export default async function Admissions() {
   const [programs, pages] = await Promise.all([

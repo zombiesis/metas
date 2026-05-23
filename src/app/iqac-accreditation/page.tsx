@@ -3,6 +3,13 @@ import { readCMSCollection, type AccreditationDocument } from '@/lib/cms-file';
 
 export const dynamic = 'force-dynamic';
 
+// FIX #11
+export const metadata = {
+  title: 'IQAC & Accreditation',
+  description: 'AICTE, GTU, NAAC, GNC and VNSGU accreditation documents and IQAC reports for Metas Adventist College, Surat.',
+  alternates: { canonical: '/iqac-accreditation' },
+};
+
 export default async function IQAC() {
   const [documents, pages] = await Promise.all([
     readCMSCollection<AccreditationDocument[]>('documents'),

@@ -3,6 +3,13 @@ import { readCMSCollection, type SiteSettings } from '@/lib/cms-file';
 
 export const dynamic = 'force-dynamic';
 
+// FIX #11
+export const metadata = {
+  title: 'Campus & Infrastructure',
+  description: 'Library, labs, auditorium, hostel and other campus facilities at Metas Adventist College, Surat.',
+  alternates: { canonical: '/infrastructure' },
+};
+
 export default async function Infrastructure() {
   const [site, pages] = await Promise.all([
     readCMSCollection<SiteSettings>('site'),

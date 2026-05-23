@@ -651,6 +651,21 @@ textarea { min-height: 120px; resize: vertical; }
 }
 .card:hover .portrait { transform: scale(1.03); }
 
+/* FIX #1: initials avatar — used when a faculty member has no real portrait */
+.portrait.portrait-initials {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 4/5;
+  background: linear-gradient(135deg, var(--navy) 0%, #1e3a5f 100%);
+  color: var(--gold-light);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
 /* ===== DOCUMENTS ===== */
 .docs { display: grid; gap: 14px; }
 .filters { display: grid; grid-template-columns: 1fr 220px; gap: 12px; margin-bottom: 12px; }
@@ -3300,3 +3315,82 @@ img, video, iframe { max-width: 100%; height: auto; }
   }
 }
 
+
+
+/* ============================================
+   BREADCRUMBS (FIX #14)
+   ============================================ */
+.breadcrumbs {
+  background: var(--section-alt);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+  font-size: 0.85rem;
+}
+.breadcrumbs ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+.breadcrumbs li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.breadcrumbs a {
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.breadcrumbs a:hover { color: var(--gold); }
+.breadcrumbs [aria-current="page"] {
+  color: var(--navy);
+  font-weight: 600;
+}
+.breadcrumb-sep {
+  color: var(--muted);
+  opacity: 0.5;
+  user-select: none;
+}
+
+/* ============================================
+   BACK TO TOP (FIX #19)
+   ============================================ */
+.back-to-top {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 40;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s;
+  box-shadow: 0 4px 14px rgba(10, 22, 40, 0.25);
+  pointer-events: none;
+}
+.back-to-top.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.back-to-top:hover {
+  background: var(--gold);
+}
+.back-to-top:active {
+  transform: translateY(0) scale(0.95);
+}
+
+/* On mobile, lift back-to-top above the sticky Apply Now CTA */
+@media (max-width: 768px) {
+  .back-to-top { bottom: 84px; right: 12px; }
+}

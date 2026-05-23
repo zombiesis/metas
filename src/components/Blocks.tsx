@@ -75,15 +75,40 @@ export function ProgramCard({ p }: { p: Program }) {
 export function FacultyGrid({ faculty, limit }: { faculty: FacultyMember[]; limit?: number }) {
   return (
     <div className="grid four">
-      {faculty.slice(0, limit || faculty.length).map((m) => (
-        <article className="card" key={m.slug || m.name}>
-          <img className="portrait" src={m.photo || '/assets/images/campus-life.webp'} alt={`${m.name} profile`} />
-          <p className="eyebrow">{m.department || 'Department to be confirmed'}</p>
-          <h3>{m.name}</h3>
-          <p>{m.qualification || '[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]'}</p>
-          <small>{m.designation || m.verification || '[CONTENT REQUIRED FROM ADMIN — DO NOT INVENT]'}</small>
-        </article>
-      ))}
+      {faculty.slice(0, limit || faculty.length).map((m) => {
+        // FIX #1: Initials avatar fallback when a faculty member has no portrait
+        // — never show a classroom photo as a person's portrait.
+        const initials = m.name
+          .split(' ')
+          .filter((part) => part && !/^(dr|mr|mrs|ms|prof)\.?$/i.test(part))
+          .filter((_, i, arr) => i === 0 || i === arr.length - 1)
+          .map((w) => w[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2);
+        const hasPhoto = m.photo && !m.photo.includes('campus-life') && !m.photo.includes('classroom');
+        return (
+          <article className="card" key={m.slug || m.name}>
+            {hasPhoto ? (
+              <img
+                className="portrait"
+                src={m.photo}
+                alt={`Portrait of ${m.name}`}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <div className="portrait portrait-initials" aria-label={`${m.name} (no photo)`}>
+                {initials || '·'}
+              </div>
+            )}
+            <p className="eyebrow">{m.department || 'Department to be confirmed'}</p>
+            <h3>{m.name}</h3>
+            <p>{m.qualification || ''}</p>
+            <small>{m.designation || m.verification || ''}</small>
+          </article>
+        );
+      })}
     </div>
   );
 }
